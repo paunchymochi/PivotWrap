@@ -29,23 +29,38 @@ Private p_repeat_labels As XlPivotFieldRepeatLabels
 
 Private p_current_page As String
 
+
 Sub init_row(field_name As String, _
         position As Long, _
         Optional sort_by As String, _
-        Optional sort_order As XlSortOrder)
+        Optional sort_order As XlSortOrder, _
+        Optional filter_type As XlPivotFilterType, _
+        Optional filter_by_field_name As String, _
+        Optional filter_value1 As String, _
+        Optional filter_value2 As String)
         
-    init_rowcol field_name, xlRowField, position, sort_by, sort_order
+    init_rowcol field_name, xlRowField, position, _
+            sort_by, sort_order, filter_type, filter_by_field_name, _
+            filter_value1, filter_value2
     
 End Sub
+
 
 Sub init_col(field_name As String, _
         position As Long, _
         Optional sort_by As String, _
-        Optional sort_order As XlSortOrder)
+        Optional sort_order As XlSortOrder, _
+        Optional filter_type As XlPivotFilterType, _
+        Optional filter_by_field_name As String, _
+        Optional filter_value1 As String, _
+        Optional filter_value2 As String)
     
-    init_rowcol field_name, xlColumnField, position, sort_by, sort_order
+    init_rowcol field_name, xlColumnField, position, _
+            sort_by, sort_order, filter_type, filter_by_field_name, _
+            filter_value1, filter_value2
     
 End Sub
+
 
 Sub init_data(field_name As String, _
         position As Long, _
@@ -75,6 +90,7 @@ Sub init_data(field_name As String, _
 
 End Sub
 
+
 Sub init_page(field_name As String, _
         position As Long, _
         Optional current_page As String)
@@ -89,14 +105,18 @@ Sub init_page(field_name As String, _
     
 End Sub
 
+
 Private Sub init_rowcol(field_name As String, _
         orientation As XlPivotFieldOrientation, _
         position As Long, _
         Optional sort_by As String, _
-        Optional sort_order As XlSortOrder)
-
+        Optional sort_order As XlSortOrder, _
+        Optional filter_type As XlPivotFilterType, _
+        Optional filter_by_field_name As String, _
+        Optional filter_value1 As String, _
+        Optional filter_value2 As String)
         
-    init field_name, orientation, posiition
+    init field_name, orientation, position
     
     p_rowcol_sort_by = sort_by
     
@@ -106,7 +126,13 @@ Private Sub init_rowcol(field_name As String, _
         p_rowcol_sort_order = sort_order
     End If
     
+    p_rowcol_filter_type = filter_type
+    p_rowcol_filter_by_field_name = filter_by_field_name
+    p_rowcol_filter_value1 = filter_value1
+    p_rowcol_filter_value2 = filter_value2
+    
 End Sub
+
 
 Private Sub init(field_name As String, _
         orientation As XlPivotFieldOrientation, _
@@ -117,4 +143,9 @@ Private Sub init(field_name As String, _
     p_position = position
     
 End Sub
+
+
+Public Property Get orientation() As XlPivotFieldOrientation
+    orientation = p_orientation
+End Property
 

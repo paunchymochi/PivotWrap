@@ -40,11 +40,26 @@ Public Property Get page_fields() As Scripting.Dictionary
 End Property
 
 
-Private Function get_column_names() As String()
+Function get_source_data() As Range
+    Set get_source_data = p_source_data
+End Function
+
+
+Function get_source_workbook() As Workbook
+    Set get_source_workbook = p_source_workbook
+End Function
+ 
+
+Function get_pivot_cache() As PivotCache
+    Set get_pivot_cache = p_pivot_cache
+End Function
+
+
+Function get_column_names() As String()
     Dim strings() As String
     Dim i As Long
     
-    ReDim strings(0 To p_source_data.Columns.Count - 1) As String
+    ReDim strings(0 To p_source_data.columns.Count - 1) As String
     For i = 0 To UBound(strings)
         strings(i) = p_source_data.Cells(1, 1 + i).Value
     Next i
@@ -117,7 +132,7 @@ Private Function print_dict(dict As Scripting.Dictionary, field_orientation As S
     
     s = vbNewLine & "=== " & field_orientation & " Fields ===" & vbNewLine
     
-    For Each key In dict.Keys
+    For Each key In dict.keys
         s2 = field_orientation & " Field: " & key & vbNewLine
         Set field = dict(key)
         s2 = s2 & vbTab & "Position: " & CStr(field.get_position()) & vbNewLine
@@ -130,6 +145,11 @@ Private Function print_dict(dict As Scripting.Dictionary, field_orientation As S
     
     print_dict = s
         
+End Function
+
+
+Function validate_data_field_names() As Boolean
+    Assert False
 End Function
 
 
@@ -182,15 +202,25 @@ End If
 
 End Sub
 
+Function add_row_fields(field_names As Variant, Optional positions As Variant) As clsPtField()
+    Debug.Assert False
+End Function
+
 
 Function add_row_field(field_name As String, _
         position As Long, _
+        Optional key As String, _
         Optional sort_by As String, _
         Optional sort_order As XlSortOrder, _
         Optional filter_type As XlPivotFilterType, _
         Optional filter_by_field_name As String, _
         Optional filter_value1 As String, _
         Optional filter_value2 As String) As clsPtField
+    
+    If field_name_exists(field_name) = False Then
+        Debug.Print ("[" & field_name & "] is not a found in the source data")
+        Exit Function
+    End If
     
     Dim ptfield As clsPtField
     Set ptfield = New clsPtField
@@ -204,7 +234,11 @@ Function add_row_field(field_name As String, _
             filter_value1, _
             filter_value2
     
-    p_row_fields_dict.Add field_name, ptfield
+    If key = vbNullString Then
+        key = field_name
+    End If
+    
+    p_row_fields_dict.Add key, ptfield
     Set add_row_field = ptfield
     
 End Function
@@ -212,12 +246,18 @@ End Function
 
 Function add_column_field(field_name As String, _
         position As Long, _
+        Optional key As String, _
         Optional sort_by As String, _
         Optional sort_order As XlSortOrder, _
         Optional filter_type As XlPivotFilterType, _
         Optional filter_by_field_name As String, _
         Optional filter_value1 As String, _
-        Optional filter_value2 As String)
+        Optional filter_value2 As String) As clsPtField
+        
+    If field_name_exists(field_name) = False Then
+        Debug.Print ("[" & field_name & "] is not a found in the source data")
+        Exit Function
+    End If
     
     Dim ptfield As clsPtField
     Set ptfield = New clsPtField
@@ -231,28 +271,44 @@ Function add_column_field(field_name As String, _
             filter_value1, _
             filter_value2
     
-    p_column_fields_dict.Add field_name, ptfield
+    If key = vbNullString Then
+        key = field_name
+    End If
+    
+    p_column_fields_dict.Add key, ptfield
     Set add_column_field = ptfield
     
 End Function
 
 
 Function add_data_field(field_name As String, _
+        field_name_original As String, _
         position As Long, _
+        Optional key As String, _
         Optional data_function As XlConsolidationFunction, _
         Optional data_calculation As XlPivotFieldCalculation, _
-        Optional data_number_format As String)
+        Optional data_number_format As String) As clsPtField
+    
+    If field_name_exists(field_name_original) = False Then
+        Debug.Print ("[" & field_name_original & "] is not a found in the source data")
+        Exit Function
+    End If
     
     Dim ptfield As clsPtField
     Set ptfield = New clsPtField
     
     ptfield.init_data field_name, _
+            field_name_original, _
             position, _
             data_function, _
             data_calculation, _
             data_number_format
     
-    p_data_fields_dict.Add field_name, ptfield
+    If key = vbNullString Then
+        key = field_name
+    End If
+    
+    p_data_fields_dict.Add key, ptfield
     Set add_data_field = ptfield
 
 End Function
@@ -260,7 +316,13 @@ End Function
 
 Function add_page_field(field_name As String, _
         position As Long, _
-        Optional current_page As String)
+        Optional key As String, _
+        Optional current_page As String) As clsPtField
+    
+    If field_name_exists(field_name) = False Then
+        Debug.Print ("[" & field_name & "] is not a found in the source data")
+        Exit Function
+    End If
     
     Dim ptfield As clsPtField
     Set ptfield = New clsPtField
@@ -269,21 +331,114 @@ Function add_page_field(field_name As String, _
             position, _
             current_page
     
-    p_page_fields_dict.Add field_name, ptfield
+    If key = vbNullString Then
+        key = field_name
+    End If
+    
+    p_page_fields_dict.Add key, ptfield
     Set add_page_field = ptfield
         
 End Function
 
 
-Function create()
+Private Function field_name_exists(field_name As String) As Boolean
+    Dim names As Variant
+    Dim name As Variant
+    
+    names = get_column_names()
+    
+    For Each name In names
+        If field_name = name Then
+            field_name_exists = True
+            Exit Function
+        End If
+    Next name
+    
+    field_name_exists = False
 
 End Function
+
+
+Function create(output_range As Range, Optional row_keys As Variant, _
+        Optional column_keys As Variant, _
+        Optional data_keys As Variant, Optional page_keys As Variant) As PivotTable
+    
+    Dim rows() As clsPtField
+    Dim columns() As clsPtField
+    Dim datas() As clsPtField
+    Dim pages() As clsPtField
+    
+    rows = populate_output_fields(p_row_fields_dict, row_keys, "Row Fields")
+    columns = populate_output_fields(p_column_fields_dict, column_keys, "Column Fields")
+    datas = populate_output_fields(p_data_fields_dict, data_keys, "Data Fields")
+    pages = populate_output_fields(p_page_fields_dict, page_keys, "Page Fields")
+    
+    Debug.Assert False
+
+End Function
+
+
+Function populate_output_fields(dict As Scripting.Dictionary, Optional keys As Variant, Optional dict_name As String) As clsPtField()
+
+    Dim arr() As clsPtField
+    Dim key As Variant
+    Dim i As Long
+    
+    
+    If IsEmpty(keys) Or IsMissing(keys) Then 'use all ptFields in dictionary, and sort by ptFields.position
+        ReDim arr(0 To dict.Count - 1) As clsPtField
+        For i = LBound(arr) To UBound(arr)
+            Set arr(i) = dict.Items(i)
+        Next i
+        sort_output_field arr
+    Else ' select items with provided keys only, ignore ptFields.position
+        If Not IsArray(keys) Then
+            keys = Array(keys)
+        End If
+        
+        ReDim arr(0 To UBound(keys) - LBound(keys)) As clsPtField
+        
+        On Error GoTo KeyErr:
+        For i = LBound(arr) To UBound(arr)
+            Set arr(i) = dict(keys(LBound(keys) + i))
+        Next i
+        On Error GoTo 0
+    End If
+    
+    populate_output_fields = arr
+    Exit Function
+    
+KeyErr:
+    MsgBox "Key [" & keys(LBound(keys) + i) & "] not found in dictionary" & dict_name
+    Resume Next
+        
+End Function
+
+
+Private Sub sort_output_field(ByRef output_field() As clsPtField)
+    Dim current As clsPtField
+    Dim i As Long, j As Long
+    
+    For i = LBound(output_field) To UBound(output_field)
+        Set current = output_field(i)
+        
+        For j = i - 1 To LBound(output_field) Step -1
+            If current.get_position() < output_field(j).get_position() Then
+                Set output_field(j + 1) = output_field(j)
+            Else
+                Exit For
+            End If
+        Next j
+        Set output_field(j + 1) = current
+    Next i
+
+End Sub
 
 
 Private Function createPivotCache(wb As Workbook, source_data As Range) As PivotCache
     Dim pivot_cache As PivotCache
     
-    Set pivot_cache = wb.PivotCaches.create(SourceType:=xlDatabase, sourceData:=source_data)
+    Set pivot_cache = wb.PivotCaches.create(SourceType:=xlDatabase, SourceData:=source_data)
     Set createPivotCache = pivot_cache
     
 End Function
@@ -320,7 +475,7 @@ Private Function get_worksheet(wb As Workbook, ws_name As String) As Worksheet
     
     Set ws = wb.Worksheets.Add()
     
-    ws.Name = ws_name
+    ws.name = ws_name
     
     Set get_worksheet = ws
     
@@ -331,7 +486,7 @@ Private Function worksheet_exists(wb As Workbook, ws_name As String) As Boolean
     Dim ws As Worksheet
     
     For Each ws In wb.Worksheets
-        If ws.Name = ws_name Then
+        If ws.name = ws_name Then
             worksheet_exists = True
             Exit Function
         End If

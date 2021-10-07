@@ -405,25 +405,87 @@ Function create(destination_range As Range, Optional table_name As String, _
     out_page = apply_rowcolpage_pt_fields(pt, page_keys)
     out_data = apply_data_pt_fields(pt, data_keys)
     
+    apply_rowcol_filter out_rows
+    apply_rowcol_filter out_columns
     
+    apply_page_filter out_page
+    
+    apply_pt_formatting out_rows, out_columns
     
     Debug.Assert False
 
 End Function
 
 
-Private Function apply_rowcol_filter()
-    Debug.Assert False
+Private Function apply_rowcol_filter(cls_pt_fields() As clsPtField, pt_fields() As PivotField) As Boolean
+    Dim cls_pt_field As clsPtField
+    Dim pt_field As PivotField
+    Dim i As Long
+    
+    For i = LBound(cls_pt_fields) To UBound(cls_pt_fields)
+        Set cls_pt_field = cls_pt_fields(i)
+        If cls_pt_field.get_rowcol_filter_type <> 0 Then ' pt field with no filter has filter type value of 0
+            Set pt_field = pt_fields(i)
+                pt_field.PivotFilters.Add2 _
+                        Type:=cls_pt_field.get_rowcol_filter_type(), _
+                        DataField:=cls_pt_field.get_rowcol_filter_by_field_name(), _
+                        Value1:=cls_pt_field.get_rowcol_filter_value1(), _
+                        Value2:=cls_pt_field.get_rowcol_filter_value2()
+        End If
+    Next i
+                        
 End Function
 
-Private Function apply_page_filter()
-    Debug.Assert False
+
+Private Function apply_page_filter(cls_pt_fields() As clsPtField, pt_fields() As PivotField) As Boolean
+    Dim cls_pt_field As clsPtField
+    Dim pt_field As PivotField
+    
+    Dim pivot_item As PivotItem
+    Dim pivot_item_name As String
+    
+    Dim current_page As Variant
+    Dim i As Long
+    Dim j As Long
+    Dim match_found As Boolean
+    
+    For i = LBound(cls_pt_fields) To UBound(cls_pt_fields)
+        Set cls_pt_field = cls_pt_fields(i)
+        Set pt_field = pt_fields(i)
+        current_page = cls_pt_field.get_current_page()
+        
+        pt_field.ClearAllFilters
+        
+        If IsArray(current_page) Then
+            ' multiple page items filter
+            pt_field.EnableMultiplePageItems = True
+            For Each pivot_item In pt_field.PivotItems
+                pivot_item_name = pivot_item.name
+                match_found = False
+                For j = LBound(current_page) To UBound(current_page)
+                    If pivot_item_name = current_page(j) Then
+                        match_found = True
+                        Exit For
+                    End If
+                Next j
+                pivot_item.Visible = match_found
+            Next pivot_item
+        
+        ElseIf cls_pt_field.get_current_page() <> vbNullString Then
+            ' single page item filter
+            
+            pt_field.CurrentPage = cls_pt_field.get_current_page()
+        End If
+    Next i
+
 End Function
 
-Private Function apply_pt_formatting()
+
+Private Function apply_pt_formatting(row_fields() As PivotField, column_fields() As PivotField) As Boolean
 ' blank space, error display, grand totals, subtotals
     Debug.Assert False
 End Function
+
 
 Private Function populate_input_fields(dict As Scripting.Dictionary, Optional keys As Variant, Optional dict_name As String) As clsPtField()
 

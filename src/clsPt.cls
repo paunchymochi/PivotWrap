@@ -149,14 +149,29 @@ End Function
 
 
 Function validate_data_field_names() As Boolean
-    Assert False
+    Debug.Assert False
+End Function
+
+
+Function get_topright_cell(Optional column_offset As Long, Optional at_page_fields As Boolean) As Range
+    Debug.Assert False
+End Function
+
+
+Function get_bottomleft_cell(Optional row_offset As Long) As Range
+    Debug.Assert False
+End Function
+ 
+
+Function get_topleft_cell(Optional at_page_fields As Boolean) As Range
+    Debug.Assert False
 End Function
 
 
 Sub init(source_workbook As Workbook, source_data As Range)
     Set p_source_workbook = source_workbook
     Set p_source_data = source_data
-    Set p_pivot_cache = createPivotCache(source_workbook, source_data)
+    Set p_pivot_cache = create_pivot_cache(source_workbook, source_data)
     init_dicts
 End Sub
 

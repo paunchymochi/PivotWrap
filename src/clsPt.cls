@@ -374,38 +374,69 @@ Private Function field_name_exists(field_name As String) As Boolean
 End Function
 
 
-Function create(output_range As Range, Optional row_keys As Variant, _
+Function create(destination_range As Range, Optional table_name As String, _
+        Optional destination_worksheet_name As String, _
+        Optional destination_workbook As Workbook, Optional row_keys As Variant, _
         Optional column_keys As Variant, _
         Optional data_keys As Variant, Optional page_keys As Variant) As PivotTable
     
-    Dim rows() As clsPtField
-    Dim columns() As clsPtField
-    Dim datas() As clsPtField
-    Dim pages() As clsPtField
+    Dim pt As PivotTable
     
-    rows = populate_output_fields(p_row_fields_dict, row_keys, "Row Fields")
-    columns = populate_output_fields(p_column_fields_dict, column_keys, "Column Fields")
-    datas = populate_output_fields(p_data_fields_dict, data_keys, "Data Fields")
-    pages = populate_output_fields(p_page_fields_dict, page_keys, "Page Fields")
+    Dim in_rows() As clsPtField
+    Dim in_columns() As clsPtField
+    Dim in_datas() As clsPtField
+    Dim in_pages() As clsPtField
+    
+    Dim out_rows() As PivotField
+    Dim out_columns() As PivotField
+    Dim out_datas() As PivotField
+    Dim out_pages() As PivotField
+    
+    Set pt = create_pivot_table(p_pivot_cache, destination_workbook, _
+            destination_worksheet_name, destination_range.[A1], table_name)
+    
+    in_rows = populate_input_fields(p_row_fields_dict, row_keys, "Row Fields")
+    in_columns = populate_input_fields(p_column_fields_dict, column_keys, "Column Fields")
+    in_datas = populate_input_fields(p_data_fields_dict, data_keys, "Data Fields")
+    in_pages = populate_input_fields(p_page_fields_dict, page_keys, "Page Fields")
+    
+    out_rows = apply_rowcolpage_pt_fields(pt, row_keys)
+    out_columns = apply_rowcolpage_pt_fields(pt, column_keys)
+    out_page = apply_rowcolpage_pt_fields(pt, page_keys)
+    out_data = apply_data_pt_fields(pt, data_keys)
+    
+    
     
     Debug.Assert False
 
 End Function
 
 
-Function populate_output_fields(dict As Scripting.Dictionary, Optional keys As Variant, Optional dict_name As String) As clsPtField()
+Private Function apply_rowcol_filter()
+    Debug.Assert False
+End Function
+
+Private Function apply_page_filter()
+    Debug.Assert False
+End Function
+
+Private Function apply_pt_formatting()
+' blank space, error display, grand totals, subtotals
+    Debug.Assert False
+End Function
+
+Private Function populate_input_fields(dict As Scripting.Dictionary, Optional keys As Variant, Optional dict_name As String) As clsPtField()
 
     Dim arr() As clsPtField
     Dim key As Variant
     Dim i As Long
-    
     
     If IsEmpty(keys) Or IsMissing(keys) Then 'use all ptFields in dictionary, and sort by ptFields.position
         ReDim arr(0 To dict.Count - 1) As clsPtField
         For i = LBound(arr) To UBound(arr)
             Set arr(i) = dict.Items(i)
         Next i
-        sort_output_field arr
+        sort_input_fields arr
     Else ' select items with provided keys only, ignore ptFields.position
         If Not IsArray(keys) Then
             keys = Array(keys)

@@ -451,7 +451,7 @@ Private Function populate_input_fields(dict As Scripting.Dictionary, Optional ke
         On Error GoTo 0
     End If
     
-    populate_output_fields = arr
+    populate_input_fields = arr
     Exit Function
     
 KeyErr:
@@ -461,36 +461,69 @@ KeyErr:
 End Function
 
 
-Private Sub sort_output_field(ByRef output_field() As clsPtField)
+Private Sub sort_input_fields(ByRef input_fields() As clsPtField)
     Dim current As clsPtField
     Dim i As Long, j As Long
     
-    For i = LBound(output_field) To UBound(output_field)
-        Set current = output_field(i)
+    For i = LBound(input_fields) To UBound(input_fields)
+        Set current = input_fields(i)
         
-        For j = i - 1 To LBound(output_field) Step -1
-            If current.get_position() < output_field(j).get_position() Then
-                Set output_field(j + 1) = output_field(j)
+        For j = i - 1 To LBound(input_fields) Step -1
+            If current.get_position() < input_fields(j).get_position() Then
+                Set input_fields(j + 1) = input_fields(j)
             Else
                 Exit For
             End If
         Next j
-        Set output_field(j + 1) = current
+        Set input_fields(j + 1) = current
     Next i
 
 End Sub
 
 
-Private Function createPivotCache(wb As Workbook, source_data As Range) As PivotCache
-    Dim pivot_cache As PivotCache
+Private Function apply_rowcolpage_pt_fields(ByRef pt As PivotTable, ByRef input_fields() As clsPtField)
+    Dim i As Long
+    Dim output_fields() As PivotField
     
-    Set pivot_cache = wb.PivotCaches.create(SourceType:=xlDatabase, SourceData:=source_data)
-    Set createPivotCache = pivot_cache
+    ReDim output_fields(LBound(input_fields) To UBound(input_fields)) As PivotField
+    
+    For i = LBound(input_fields) To UBound(input_fields)
+        Set output_fields(i) = pt.PivotFields(input_fields(i).get_field_name())
+        output_fields(i).orientation = input_fields(i).get_orientation()
+        output_fields(i).position = i + 1
+    Next i
+    
+    apply_rowcolpage_pt_fields = output_fields
+        
+End Function
+
+
+Private Function apply_data_pt_fields(ByRef pt As PivotTable, ByRef input_fields() As clsPtField)
+    Dim i As Long
+    Dim output_fields() As PivotField
+    
+    ReDim output_fields(LBound(input_fields) To UBound(input_fields)) As PivotField
+    
+    For i = LBound(input_fields) To UBound(input_fields)
+        Set output_fields(i) = pt.AddDataField(input_fields(i).get_field_name_original(), _
+                input_fields(i).get_field_name(), input_fields(i).get_data_function)
+    Next i
+    
+    add_data_pt_fields = output_fields
     
 End Function
 
 
-Private Function createPivotTable(pivot_cache As PivotCache, _
+Private Function create_pivot_cache(wb As Workbook, source_data As Range) As PivotCache
+    Dim pivot_cache As PivotCache
+    
+    Set pivot_cache = wb.PivotCaches.create(SourceType:=xlDatabase, SourceData:=source_data)
+    Set create_pivot_cache = pivot_cache
+    
+End Function
+
+
+Private Function create_pivot_table(pivot_cache As PivotCache, _
         destination_wb As Workbook, destination_ws_name As String, _
         destination_topleft As String, table_name As String) As PivotTable
         
@@ -503,10 +536,10 @@ Private Function createPivotTable(pivot_cache As PivotCache, _
     Set table_destination = ws.Range(destination_topleft)
     
     
-    Set pivot_table = pivot_cache.createPivotTable(TableDestination:=table_destination, _
+    Set pivot_table = pivot_cache.create_pivot_table(TableDestination:=table_destination, _
             TableName:=table_name)
     
-    Set createPivotTable = pivot_table
+    Set create_pivot_table = pivot_table
 
 End Function
 

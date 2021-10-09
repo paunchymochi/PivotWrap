@@ -70,7 +70,7 @@ Sub init_data(field_name As String, _
         Optional data_calculation As XlPivotFieldCalculation, _
         Optional data_number_format As String)
     
-    init field_name, field_name_original, xlDataField, posiition
+    init field_name, field_name_original, xlDataField, position
     
     If data_function = 0 Then
         p_data_function = xlSum
@@ -155,6 +155,11 @@ End Function
 
 Function get_field_name() As String
     get_field_name = p_field_name
+End Function
+
+
+Function get_field_name_original() As String
+    get_field_name_original = p_field_name_original
 End Function
 
 

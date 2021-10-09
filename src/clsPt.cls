@@ -611,11 +611,70 @@ Function create_pivot_table(pivot_cache As PivotCache, _
     table_destination = table_destination & ws.name & "!"
     table_destination = table_destination & destination_topleft_r1c1
     
+    table_name = get_table_name(table_name)
+    
     Set pivot_table = pivot_cache.createPivotTable(TableDestination:=table_destination, _
             TableName:=table_name)
     
     Set create_pivot_table = pivot_table
 
+End Function
+
+
+Function get_unique_table_name(wb As Workbook, table_name As String) As String
+
+    If table_name Is vbNullString Then
+        table_name = "PivotTable"
+    End If
+    
+    While is_pivot_table_name_exists(wb, table_name) = True
+        table_name = get_table_name_suffixed(table_name)
+    Loop
+    
+    get_table_name = table_name
+    
+End Function
+
+
+Function get_table_name_suffixed(table_name As String) As String
+    Dim v As Variant
+    
+    v = Split(table_name, "_")
+    
+    If UBound(v) = 0 Then
+        get_table_name_suffixed = table_name & "_01"
+        Exit Function
+    End If
+    
+    Dim suffix As String
+    Dim suffix_num As Long
+    
+    suffix = v(UBound(v))
+    
+    If IsNumeric(suffix) Then
+        suffix_num = CLng(suffix)
+        suffix_num = suffix_num + 1
+        suffix = CStr(suffix_num)
+        Do While Len(suffix) < 2
+            suffix = "0" & suffix
+        Loop
+        
+        Dim i As Long
+        Dim s As String
+        For i = LBound(v) To UBound(v) - 1
+            s = s & v(i)
+        Next i
+        s = s & "_" & suffix
+        get_table_name_suffixed = s
+        Exit Function
+    ElseIf suffix = vbNullString Then
+        get_table_name_suffixed = table_name & "01"
+        Exit Function
+    Else
+        get_table_name_suffixed = table_name & "_01"
+        Exit Function
+    End If
+    
 End Function
 
 

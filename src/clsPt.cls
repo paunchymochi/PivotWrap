@@ -392,23 +392,28 @@ Function create(destination_range As Range, Optional table_name As String, _
     Dim out_datas() As PivotField
     Dim out_pages() As PivotField
     
-    Set pt = create_pivot_table(p_pivot_cache, destination_workbook, _
-            destination_worksheet_name, destination_range.[A1], table_name)
+    Set destination_workbook = get_workbook(destination_workbook)
+    
+    Set pt = create_pivot_table(p_pivot_cache, _
+        destination_range.[A1], _
+        destination_worksheet_name, _
+        destination_workbook, _
+        table_name)
     
     in_rows = populate_input_fields(p_row_fields_dict, row_keys, "Row Fields")
     in_columns = populate_input_fields(p_column_fields_dict, column_keys, "Column Fields")
     in_datas = populate_input_fields(p_data_fields_dict, data_keys, "Data Fields")
     in_pages = populate_input_fields(p_page_fields_dict, page_keys, "Page Fields")
     
-    out_rows = apply_rowcolpage_pt_fields(pt, row_keys)
-    out_columns = apply_rowcolpage_pt_fields(pt, column_keys)
-    out_page = apply_rowcolpage_pt_fields(pt, page_keys)
-    out_data = apply_data_pt_fields(pt, data_keys)
+    out_rows = apply_rowcolpage_pt_fields(pt, in_rows)
+    out_columns = apply_rowcolpage_pt_fields(pt, in_columns)
+    out_pages = apply_rowcolpage_pt_fields(pt, in_pages)
+    out_datas = apply_data_pt_fields(pt, in_datas)
     
-    apply_rowcol_filter out_rows
-    apply_rowcol_filter out_columns
+    apply_rowcol_filter in_rows, out_rows
+    apply_rowcol_filter in_columns, out_columns
     
-    apply_page_filter out_page
+    apply_page_filter in_pages, out_pages
     
     apply_pt_formatting out_rows, out_columns
     
@@ -576,8 +581,11 @@ Private Function apply_data_pt_fields(ByRef pt As PivotTable, ByRef input_fields
 End Function
 
 
-Private Function create_pivot_cache(wb As Workbook, source_data As Range) As PivotCache
+Function create_pivot_cache(source_data As Range) As PivotCache
     Dim pivot_cache As PivotCache
+    Dim wb As Workbook
+    
+    Set wb = source_data.Parent.Parent
     
     Set pivot_cache = wb.PivotCaches.create(SourceType:=xlDatabase, SourceData:=source_data)
     Set create_pivot_cache = pivot_cache
@@ -585,24 +593,130 @@ Private Function create_pivot_cache(wb As Workbook, source_data As Range) As Piv
 End Function
 
 
-Private Function create_pivot_table(pivot_cache As PivotCache, _
-        destination_wb As Workbook, destination_ws_name As String, _
-        destination_topleft As String, table_name As String) As PivotTable
+Function create_pivot_table(pivot_cache As PivotCache, _
+        destination_topleft_r1c1 As String, _
+        Optional destination_ws_name As String, _
+        Optional destination_wb As Workbook, _
+        Optional table_name As String) As PivotTable
         
     Dim pivot_table As PivotTable
-    Dim table_destination As Range
+    Dim table_destination As String
     Dim ws As Worksheet
+    
+    Set destination_wb = get_workbook(destination_wb)
     
     Set ws = get_worksheet(destination_wb, destination_ws_name)
 
-    Set table_destination = ws.Range(destination_topleft)
+    table_destination = "[" & destination_wb.name & "]"
+    table_destination = table_destination & ws.name & "!"
+    table_destination = table_destination & destination_topleft_r1c1
     
-    
-    Set pivot_table = pivot_cache.create_pivot_table(TableDestination:=table_destination, _
+    Set pivot_table = pivot_cache.createPivotTable(TableDestination:=table_destination, _
             TableName:=table_name)
     
     Set create_pivot_table = pivot_table
 
+End Function
+
+
+Function get_topleft_r1c1(topleft As String) As String
+    ' Converts address string into R1C1 format
+    Dim rng As Range
+    Dim r As String, c As String
+    
+    If UCase(topleft) Like "R*C*" Then
+        get_topleft_r1c1 = topleft
+        Exit Function
+    End If
+    
+    Set rng = Range(topleft)
+    r = CStr(rng.Row)
+    c = CStr(rng.Column)
+    
+    get_topleft_r1c1 = "R" & r & "C" & c
+    
+End Function
+
+Function get_destination_range(wb_name As String, ws_name As String, topleft As String) As Range
+    Dim wb As Workbook
+    Dim ws As Worksheet
+    Dim rng As Range
+    
+    Set wb = Workbooks(wb_name)
+    Set ws = wb.Worksheets(ws_name)
+    Set rng = ws.Range(topleft)
+    
+    Set get_destination_range = rng
+    
+End Function
+
+Function get_destination_r1c1(wb_name As String, ws_name As String, topleft As String) As String
+    ' Returns full address in R1C1 format
+    Dim d As String
+    
+    d = "[" & wb_name & "]"
+    d = d & ws_name & "!"
+    d = d & get_topleft_r1c1(topleft)
+    
+    get_destination_r1c1 = d
+
+End Function
+
+
+Function is_pivot_table_name_exists(wb As Workbook, table_name As String) As Boolean
+    Dim pivot_table As PivotTable
+    
+    For Each pivot_table In wb.PivotTables
+        If pivot_table.name = table_name Then
+            is_pivot_table_name_exists = True
+            Exit Function
+        End If
+    Next pivot_table
+    
+    is_pivot_table_name_exists = False
+    
+End Function
+
+
+Function is_pivot_table_overlap(wb As Workbook, destination_range As Range) As Boolean
+    Dim pivot_table As PivotTable
+    Dim ws As Worksheet
+    Dim rng As Range
+    
+    For Each ws In wb.Worksheets
+        If ws.name = destination_range.Parent.name Then
+            For Each pivot_table In ws.PivotTables
+                On Error GoTo Err:
+                    Set rng = pivot_table.TableRange2
+                    Debug.Print (ws.name & " : " & pivot_table.TableRange2.Address)
+                On Error GoTo 0
+                If Not rng Is Nothing Then
+                    If Application.Union(rng, destination_range).Address = rng.Address Then
+                        is_pivot_table_overlap = True
+                        Exit Function
+                    End If
+                End If
+            Next pivot_table
+        End If
+    Next ws
+    
+    is_pivot_table_overlap = False
+    
+    Exit Function
+    
+Err:
+    Set rng = Nothing
+    Resume Next
+        
+End Function
+
+Private Function get_workbook(wb As Variant) As Workbook
+    If wb Is Nothing Then
+        Set wb = ActiveWorkbook
+    End If
+    
+    Set get_workbook = wb
+    
 End Function
 
 
@@ -614,6 +728,7 @@ Private Function get_worksheet(wb As Workbook, ws_name As String) As Worksheet
         Exit Function
     End If
     
+    ActiveSheet.Select
     Set ws = wb.Worksheets.Add()
     
     ws.name = ws_name

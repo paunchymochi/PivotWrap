@@ -374,13 +374,19 @@ Private Function field_name_exists(field_name As String) As Boolean
 End Function
 
 
-Function create(destination_range As Range, Optional table_name As String, _
+Function create(destination_row As Long, _
+        destination_column As Long, _
+        Optional table_name As String, _
         Optional destination_worksheet_name As String, _
-        Optional destination_workbook As Workbook, Optional row_keys As Variant, _
+        Optional destination_workbook As Workbook, _
+        Optional row_keys As Variant, _
         Optional column_keys As Variant, _
-        Optional data_keys As Variant, Optional page_keys As Variant) As PivotTable
+        Optional data_keys As Variant, _
+        Optional page_keys As Variant) As PivotTable
     
     Dim pt As PivotTable
+    Dim destination_range As Range
+    Dim destination_worksheet As Worksheet
     
     Dim in_rows() As clsPtField
     Dim in_columns() As clsPtField
@@ -393,12 +399,21 @@ Function create(destination_range As Range, Optional table_name As String, _
     Dim out_pages() As PivotField
     
     Set destination_workbook = get_workbook(destination_workbook)
+    Set destination_worksheet = get_worksheet(destination_workbook, destination_worksheet_name)
+    
+    Set destination_range = get_destination_range(destination_workbook.name, _
+            destination_worksheet_name, _
+            Cells(destination_row, destination_column).Address)
     
     Set pt = create_pivot_table(p_pivot_cache, _
-        destination_range.[A1], _
+        destination_range, _
         destination_worksheet_name, _
         destination_workbook, _
         table_name)
+    
+    If pt Is Nothing Then
+        Exit Function
+    End If
     
     in_rows = populate_input_fields(p_row_fields_dict, row_keys, "Row Fields")
     in_columns = populate_input_fields(p_column_fields_dict, column_keys, "Column Fields")
@@ -594,26 +609,29 @@ End Function
 
 
 Function create_pivot_table(pivot_cache As PivotCache, _
-        destination_topleft_r1c1 As String, _
+        destination_range As Range, _
         Optional destination_ws_name As String, _
         Optional destination_wb As Workbook, _
         Optional table_name As String) As PivotTable
         
     Dim pivot_table As PivotTable
-    Dim table_destination As String
     Dim ws As Worksheet
+    Dim destination_r1c1 As String
     
     Set destination_wb = get_workbook(destination_wb)
     
     Set ws = get_worksheet(destination_wb, destination_ws_name)
-
-    table_destination = "[" & destination_wb.name & "]"
-    table_destination = table_destination & ws.name & "!"
-    table_destination = table_destination & destination_topleft_r1c1
     
-    table_name = get_table_name(table_name)
+    table_name = get_unique_table_name(destination_wb, table_name)
     
-    Set pivot_table = pivot_cache.createPivotTable(TableDestination:=table_destination, _
+    If is_pivot_table_overlap(destination_wb, destination_range) Then
+        MsgBox "Pivot Tables cannot overlap"
+        Exit Function
+    End If
+    
+    destination_r1c1 = range_to_r1c1(destination_range)
+    
+    Set pivot_table = pivot_cache.createPivotTable(TableDestination:=destination_r1c1, _
             TableName:=table_name)
     
     Set create_pivot_table = pivot_table
@@ -623,15 +641,15 @@ End Function
 
 Function get_unique_table_name(wb As Workbook, table_name As String) As String
 
-    If table_name Is vbNullString Then
+    If table_name = vbNullString Then
         table_name = "PivotTable"
     End If
     
-    While is_pivot_table_name_exists(wb, table_name) = True
+    Do While is_pivot_table_name_exists(wb, table_name) = True
         table_name = get_table_name_suffixed(table_name)
     Loop
     
-    get_table_name = table_name
+    get_unique_table_name = table_name
     
 End Function
 
@@ -709,17 +727,26 @@ Function get_destination_range(wb_name As String, ws_name As String, topleft As 
     
 End Function
 
-Function get_destination_r1c1(wb_name As String, ws_name As String, topleft As String) As String
-    ' Returns full address in R1C1 format
-    Dim d As String
+Function range_to_r1c1(rng As Range) As String
+    Dim s As String
     
-    d = "[" & wb_name & "]"
-    d = d & ws_name & "!"
-    d = d & get_topleft_r1c1(topleft)
+    s = "[" & rng.Parent.Parent.name & "]"
+    s = s & rng.Parent.name & "!"
+    s = s & get_topleft_r1c1(rng.Address)
     
-    get_destination_r1c1 = d
-
 End Function
+
+'Function get_destination_r1c1(wb_name As String, ws_name As String, topleft As String) As String
+'    ' Returns full address in R1C1 format
+'    Dim d As String
+'
+'    d = "[" & wb_name & "]"
+'    d = d & ws_name & "!"
+'    d = d & get_topleft_r1c1(topleft)
+'
+'    get_destination_r1c1 = d
+'
+'End Function
 
 
 Function is_pivot_table_name_exists(wb As Workbook, table_name As String) As Boolean
@@ -781,6 +808,10 @@ End Function
 
 Private Function get_worksheet(wb As Workbook, ws_name As String) As Worksheet
     Dim ws As Worksheet
+    
+    If ws_name = vbNullString Then
+        ws_name = "PivotTable"
+    End If
     
     If worksheet_exists(wb, ws_name) Then
         Set get_worksheet = wb.Worksheets(ws_name)

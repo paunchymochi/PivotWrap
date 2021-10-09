@@ -168,10 +168,10 @@ Function get_topleft_cell(Optional at_page_fields As Boolean) As Range
 End Function
 
 
-Sub init(source_workbook As Workbook, source_data As Range)
-    Set p_source_workbook = source_workbook
+Sub init(source_data As Range)
+    Set p_source_workbook = source_data.Parent.Parent
     Set p_source_data = source_data
-    Set p_pivot_cache = create_pivot_cache(source_workbook, source_data)
+    Set p_pivot_cache = create_pivot_cache(source_data)
     init_dicts
 End Sub
 

@@ -19,6 +19,9 @@ Private p_data_fields_dict As Scripting.Dictionary
 Private p_page_fields_dict As Scripting.Dictionary
 Private d As Scripting.Dictionary
 
+Private p_datapivot_field_orientation As XlPivotFieldOrientation
+Private p_datapivot_field_position As Long
+
 
 Public Property Get row_fields() As Scripting.Dictionary
     Set row_fields = p_row_fields_dict
@@ -224,7 +227,7 @@ End Function
 
 
 Public Function add_row_field(field_name As String, _
-        position As Long, _
+        Position As Long, _
         Optional key As String, _
         Optional sort_by As String, _
         Optional sort_order As XlSortOrder, _
@@ -242,7 +245,7 @@ Public Function add_row_field(field_name As String, _
     Set ptfield = New clsPtField
     
     ptfield.init_row field_name, _
-            position, _
+            Position, _
             sort_by, _
             sort_order, _
             filter_type, _
@@ -261,7 +264,7 @@ End Function
 
 
 Public Function add_column_field(field_name As String, _
-        position As Long, _
+        Position As Long, _
         Optional key As String, _
         Optional sort_by As String, _
         Optional sort_order As XlSortOrder, _
@@ -279,7 +282,7 @@ Public Function add_column_field(field_name As String, _
     Set ptfield = New clsPtField
     
     ptfield.init_col field_name, _
-            position, _
+            Position, _
             sort_by, _
             sort_order, _
             filter_type, _
@@ -299,7 +302,7 @@ End Function
 
 Public Function add_data_field(field_name As String, _
         field_name_original As String, _
-        position As Long, _
+        Position As Long, _
         Optional key As String, _
         Optional data_function As XlConsolidationFunction, _
         Optional data_calculation As XlPivotFieldCalculation, _
@@ -315,7 +318,7 @@ Public Function add_data_field(field_name As String, _
     
     ptfield.init_data field_name, _
             field_name_original, _
-            position, _
+            Position, _
             data_function, _
             data_calculation, _
             data_number_format
@@ -331,7 +334,7 @@ End Function
 
 
 Public Function add_page_field(field_name As String, _
-        position As Long, _
+        Position As Long, _
         Optional key As String, _
         Optional current_page As String) As clsPtField
     
@@ -344,7 +347,7 @@ Public Function add_page_field(field_name As String, _
     Set ptfield = New clsPtField
     
     ptfield.init_page field_name, _
-            position, _
+            Position, _
             current_page
     
     If key = vbNullString Then
@@ -354,6 +357,17 @@ Public Function add_page_field(field_name As String, _
     p_page_fields_dict.Add key, ptfield
     Set add_page_field = ptfield
         
+End Function
+
+
+Public Function set_datapivot_field(data_orientation As XlPivotFieldOrientation, _
+        Optional data_position As Long) As Boolean
+        
+    p_datapivot_field_orientation = data_orientation
+    p_datapivot_field_position = data_position
+
+    set_datapivot_field = True
+    
 End Function
 
 
@@ -517,6 +531,8 @@ Public Function create(destination_row As Long, _
     
     apply_pt_formatting out_rows, out_columns
     
+    apply_datapivot_field pt, out_rows, out_columns
+    
     Debug.Assert False
 
 End Function
@@ -648,6 +664,41 @@ Private Sub sort_input_fields(ByRef input_fields() As clsPtField)
 End Sub
 
 
+Private Function apply_datapivot_field(ByRef pt As PivotTable, _
+        row_fields() As PivotField, _
+        column_fields() As PivotField) As Boolean
+    
+    Dim o As XlPivotFieldOrientation
+    Dim p As Long
+    Dim last_position As Long
+    
+    o = p_datapivot_field_orientation
+    p = p_datapivot_field_position
+    
+    If o = 0 Then ' default to column field
+        o = xlColumnField
+    End If
+    
+    If o = xlColumnField Then
+        last_position = UBound(column_fields) + 2
+    ElseIf o = xlRowField Then
+        last_position = UBound(row_fields) + 2
+    Else
+        Debug.Assert False ' Unknown orientation
+    End If
+    
+    If p = 0 Or p > last_position Then ' default to last place
+        p = last_position
+    End If
+
+    With pt.DataPivotField
+        .Orientation = o
+        .Position = p
+    End With
+    
+End Function
+
+
 Private Function apply_rowcolpage_pt_fields(ByRef pt As PivotTable, ByRef input_fields() As clsPtField)
     Dim i As Long
     Dim output_fields() As PivotField
@@ -656,8 +707,8 @@ Private Function apply_rowcolpage_pt_fields(ByRef pt As PivotTable, ByRef input_
     
     For i = LBound(input_fields) To UBound(input_fields)
         Set output_fields(i) = pt.PivotFields(input_fields(i).get_field_name())
-        output_fields(i).orientation = input_fields(i).get_orientation()
-        output_fields(i).position = i + 1
+        output_fields(i).Orientation = input_fields(i).get_orientation()
+        output_fields(i).Position = i + 1
     Next i
     
     apply_rowcolpage_pt_fields = output_fields

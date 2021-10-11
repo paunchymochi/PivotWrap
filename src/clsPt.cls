@@ -416,7 +416,6 @@ Private Function pop_field(d As Scripting.Dictionary, field_name As String, is_k
     Dim i As Long
     
     For i = 0 To d.Count - 1
-        Stop
         If is_key Then
             If field_name = d.keys(i) Then
                 Set pt_field = d.Items(i)
@@ -438,22 +437,26 @@ End Function
 
 
 Public Function clear_row_fields() As Boolean
-    Debug.Assert False
+    p_row_fields_dict.RemoveAll
+    clear_row_fields = True
 End Function
 
 
 Public Function clear_column_fields() As Boolean
-    Debug.Assert False
+    p_column_fields_dict.RemoveAll
+    clear_column_fields = True
 End Function
 
 
 Public Function clear_page_fields() As Boolean
-    Debug.Assert False
+    p_page_fields_dict.RemoveAll
+    clear_page_fields = True
 End Function
 
 
 Public Function clear_data_fields() As Boolean
-    Debug.Assert False
+    p_data_fields_dict.RemoveAll
+    clear_data_fields = True
 End Function
 
 

@@ -598,7 +598,7 @@ Private Function apply_data_pt_fields(ByRef pt As PivotTable, ByRef input_fields
 End Function
 
 
-Function create_pivot_cache(source_data As Range) As PivotCache
+Private Function create_pivot_cache(source_data As Range) As PivotCache
     Dim pivot_cache As PivotCache
     Dim wb As Workbook
     
@@ -610,7 +610,7 @@ Function create_pivot_cache(source_data As Range) As PivotCache
 End Function
 
 
-Function create_pivot_table(pivot_cache As PivotCache, _
+Private Function create_pivot_table(pivot_cache As PivotCache, _
         destination_range As Range, _
         Optional destination_ws_name As String, _
         Optional destination_wb As Workbook, _
@@ -642,7 +642,7 @@ Function create_pivot_table(pivot_cache As PivotCache, _
 End Function
 
 
-Function get_destination_range(destination_range As Range, _
+Private Function get_destination_range(destination_range As Range, _
         Optional destination_ws_name As String, _
         Optional destination_wb As Workbook) As Range
             
@@ -655,7 +655,7 @@ Function get_destination_range(destination_range As Range, _
 End Function
 
 
-Function get_unique_table_name(wb As Workbook, table_name As String) As String
+Private Function get_unique_table_name(wb As Workbook, table_name As String) As String
 
     If table_name = vbNullString Then
         table_name = "PivotTable"
@@ -670,7 +670,7 @@ Function get_unique_table_name(wb As Workbook, table_name As String) As String
 End Function
 
 
-Function get_table_name_suffixed(table_name As String) As String
+Private Function get_table_name_suffixed(table_name As String) As String
     Dim v As Variant
     
     v = Split(table_name, "_")
@@ -712,7 +712,7 @@ Function get_table_name_suffixed(table_name As String) As String
 End Function
 
 
-Function get_topleft_r1c1(topleft As String) As String
+Private Function get_topleft_r1c1(topleft As String) As String
     ' Converts address string into R1C1 format
     Dim rng As Range
     Dim r As String, c As String
@@ -731,7 +731,7 @@ Function get_topleft_r1c1(topleft As String) As String
 End Function
 
 
-Function range_to_r1c1(rng As Range) As String
+Private Function range_to_r1c1(rng As Range) As String
     Dim s As String
     
     s = "[" & rng.Parent.Parent.name & "]"
@@ -743,7 +743,7 @@ Function range_to_r1c1(rng As Range) As String
 End Function
 
 
-Function is_pivot_table_name_exists(wb As Workbook, table_name As String) As Boolean
+Private Function is_pivot_table_name_exists(wb As Workbook, table_name As String) As Boolean
     Dim ws As Worksheet
     Dim pivot_table As PivotTable
     
@@ -761,7 +761,7 @@ Function is_pivot_table_name_exists(wb As Workbook, table_name As String) As Boo
 End Function
 
 
-Function is_pivot_table_overlap(wb As Workbook, destination_range As Range) As Boolean
+Private Function is_pivot_table_overlap(wb As Workbook, destination_range As Range) As Boolean
     Dim pivot_table As PivotTable
     Dim ws As Worksheet
     Dim rng As Range

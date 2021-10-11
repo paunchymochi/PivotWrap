@@ -32,15 +32,16 @@ Private p_current_page As String
 
 
 Sub init_row(field_name As String, _
-        position As Long, _
+        Position As Long, _
         Optional sort_by As String, _
         Optional sort_order As XlSortOrder, _
         Optional filter_type As XlPivotFilterType, _
         Optional filter_by_field_name As String, _
         Optional filter_value1 As String, _
         Optional filter_value2 As String)
+    ' Initialize Row Field
         
-    init_rowcol field_name, xlRowField, position, _
+    init_rowcol field_name, xlRowField, Position, _
             sort_by, sort_order, filter_type, filter_by_field_name, _
             filter_value1, filter_value2
     
@@ -48,15 +49,16 @@ End Sub
 
 
 Sub init_col(field_name As String, _
-        position As Long, _
+        Position As Long, _
         Optional sort_by As String, _
         Optional sort_order As XlSortOrder, _
         Optional filter_type As XlPivotFilterType, _
         Optional filter_by_field_name As String, _
         Optional filter_value1 As String, _
         Optional filter_value2 As String)
+    ' Initialize Column Field
     
-    init_rowcol field_name, xlColumnField, position, _
+    init_rowcol field_name, xlColumnField, Position, _
             sort_by, sort_order, filter_type, filter_by_field_name, _
             filter_value1, filter_value2
     
@@ -65,12 +67,13 @@ End Sub
 
 Sub init_data(field_name As String, _
         field_name_original As String, _
-        position As Long, _
+        Position As Long, _
         Optional data_function As XlConsolidationFunction, _
         Optional data_calculation As XlPivotFieldCalculation, _
         Optional data_number_format As String)
+    ' Initialize Data Field
     
-    init field_name, field_name_original, xlDataField, position
+    init field_name, field_name_original, xlDataField, Position
     
     If data_function = 0 Then
         p_data_function = xlSum
@@ -94,10 +97,11 @@ End Sub
 
 
 Sub init_page(field_name As String, _
-        position As Long, _
+        Position As Long, _
         Optional current_page As String)
+    ' Initialize Page Field
     
-    init field_name, field_name, xlPageField, position
+    init field_name, field_name, xlPageField, Position
     
     If current_page = "" Then
         p_current_page = "(All)"
@@ -109,16 +113,17 @@ End Sub
 
 
 Private Sub init_rowcol(field_name As String, _
-        orientation As XlPivotFieldOrientation, _
-        position As Long, _
+        Orientation As XlPivotFieldOrientation, _
+        Position As Long, _
         Optional sort_by As String, _
         Optional sort_order As XlSortOrder, _
         Optional filter_type As XlPivotFilterType, _
         Optional filter_by_field_name As String, _
         Optional filter_value1 As String, _
         Optional filter_value2 As String)
+    ' Shared code for initializing Row and Column Fields
         
-    init field_name, field_name, orientation, position
+    init field_name, field_name, Orientation, Position
     
     p_rowcol_sort_by = sort_by
     
@@ -138,13 +143,14 @@ End Sub
 
 Private Sub init(field_name As String, _
         field_name_original As String, _
-        orientation As XlPivotFieldOrientation, _
-        position As Long)
+        Orientation As XlPivotFieldOrientation, _
+        Position As Long)
+    ' Shared code for initializing all 4 field orientations
     
     p_field_name = field_name
     p_field_name_original = field_name_original
-    p_orientation = orientation
-    p_position = position
+    p_orientation = Orientation
+    p_position = Position
     
 End Sub
 

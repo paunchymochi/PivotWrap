@@ -627,6 +627,37 @@ Public Function create(destination_row As Long, _
 End Function
 
 
+Public Function update(destination_row As Long, _
+        destination_column As Long, _
+        table_name As String, _
+        Optional destination_worksheet_name As String, _
+        Optional destination_workbook As Workbook, _
+        Optional row_keys As Variant, _
+        Optional column_keys As Variant, _
+        Optional data_keys As Variant, _
+        Optional page_keys As Variant) As PivotTable
+    ' Deletes pivot table with table_name and creates it again
+    
+    Dim pt As PivotTable
+    
+    Set destination_workbook = get_workbook(destination_workbook)
+    
+    pt = lookup_pivot_table(destination_workbook, table_name)
+    
+    If Not (pt Is Nothing) Then ' pt with table_name found; delete pt
+        pt.TableRange2.Clear
+    End If
+    
+    ' call create
+    create destination_row, destination_column, _
+            table_name, destination_worksheet_name, _
+            destination_workbook, row_keys, column_keys, _
+            data_keys, page_keys
+
+End Function
+        
+
+
 Private Function apply_rowcol_filter(cls_pt_fields() As clsPtField, pt_fields() As PivotField) As Boolean
     ' Applies row and column filters
     ' Called by create()

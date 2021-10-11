@@ -755,14 +755,17 @@ End Function
 
 
 Function is_pivot_table_name_exists(wb As Workbook, table_name As String) As Boolean
+    Dim ws As Worksheet
     Dim pivot_table As PivotTable
     
-    For Each pivot_table In wb.PivotTables
-        If pivot_table.name = table_name Then
-            is_pivot_table_name_exists = True
-            Exit Function
-        End If
-    Next pivot_table
+    For Each ws In wb.Worksheets
+        For Each pivot_table In ws.PivotTables
+            If pivot_table.name = table_name Then
+                is_pivot_table_name_exists = True
+                Exit Function
+            End If
+        Next pivot_table
+    Next ws
     
     is_pivot_table_name_exists = False
     

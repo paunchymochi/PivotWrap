@@ -21,8 +21,14 @@ Private d As Scripting.Dictionary
 
 Private p_datapivot_field_orientation As XlPivotFieldOrientation
 Private p_datapivot_field_position As Long
-Private p_row_grand_visible As Boolean
-Private p_column_grand_visible As Boolean
+
+Private p_pt_row_grand_visible As Boolean
+Private p_pt_column_grand_visible As Boolean
+
+Private p_pt_error_string As String
+Private p_pt_empty_string As String
+Private p_pt_display_error_string As Boolean
+Private p_pt_display_empty_string As Boolean
 
 
 Public Property Get row_fields() As Scripting.Dictionary
@@ -178,6 +184,7 @@ Public Sub init(source_data As Range)
     Set p_source_data = source_data
     Set p_pivot_cache = create_pivot_cache(source_data)
     init_dicts
+    setup_defaults
 End Sub
 
 
@@ -196,6 +203,22 @@ Private Sub init_dicts()
     Set p_column_fields_dict = New Scripting.Dictionary
     Set p_data_fields_dict = New Scripting.Dictionary
     Set p_page_fields_dict = New Scripting.Dictionary
+End Sub
+
+
+Private Sub setup_defaults()
+    
+    'Display empty and error strings
+    p_pt_display_empty_string = True
+    p_pt_empty_string = vbNullString
+    p_pt_display_error_string = False
+    p_pt_error_string = vbNullString
+    
+    'Grand Totals
+    p_pt_row_grand_visible = True
+    p_pt_column_grand_visible = True
+    
+    
 End Sub
 
 
@@ -374,8 +397,8 @@ End Function
 
 
 Public Function set_grand_totals_visibility(row_visible As Boolean, column_visible As Boolean) As Boolean
-    p_row_grand_visible = row_visible
-    p_column_grand_visible = column_visible
+    p_pt_row_grand_visible = row_visible
+    p_pt_column_grand_visible = column_visible
 End Function
 
 
@@ -614,8 +637,8 @@ Private Function apply_pt_formatting(pt As PivotTable, row_fields() As PivotFiel
 ' blank space, error display, grand totals, subtotals
     
     'Grand Totals
-    pt.RowGrand = p_row_grand_visible
-    pt.ColumnGrand = p_column_grand_visible
+    pt.RowGrand = p_pt_row_grand_visible
+    pt.ColumnGrand = p_pt_column_grand_visible
     
     Debug.Assert False
 End Function

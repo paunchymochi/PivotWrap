@@ -737,6 +737,8 @@ Function range_to_r1c1(rng As Range) As String
     s = s & rng.Parent.name & "!"
     s = s & get_topleft_r1c1(rng.Address)
     
+    range_to_r1c1 = s
+    
 End Function
 
 'Function get_destination_r1c1(wb_name As String, ws_name As String, topleft As String) As String

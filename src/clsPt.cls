@@ -375,6 +375,46 @@ Private Function field_name_exists(field_name As String) As Boolean
 End Function
 
 
+Public Function remove_row_field(field_name As String, Optional key As String) As clsPtField
+    Debug.Assert False
+End Function
+
+
+Public Function remove_column_field(field_name As String, Optional key As String) As clsPtField
+    Debug.Assert False
+End Function
+
+
+Public Function remove_page_field(field_name As String, Optional key As String) As clsPtField
+    Debug.Assert False
+End Function
+
+
+Public Function remove_data_field(field_name As String, Optional key As String) As clsPtField
+    Debug.Assert False
+End Function
+
+
+Public Function clear_row_fields() As Boolean
+    Debug.Assert False
+End Function
+
+
+Public Function clear_column_fields() As Boolean
+    Debug.Assert False
+End Function
+
+
+Public Function clear_page_fields() As Boolean
+    Debug.Assert False
+End Function
+
+
+Public Function clear_data_fields() As Boolean
+    Debug.Assert False
+End Function
+
+
 Public Function create(destination_row As Long, _
         destination_column As Long, _
         Optional table_name As String, _

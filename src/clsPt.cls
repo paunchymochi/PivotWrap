@@ -401,10 +401,9 @@ Function create(destination_row As Long, _
     Set destination_workbook = get_workbook(destination_workbook)
     Set destination_worksheet = get_worksheet(destination_workbook, destination_worksheet_name)
     
-    Set destination_range = get_destination_range(destination_workbook.name, _
-            destination_worksheet_name, _
-            Cells(destination_row, destination_column).Address)
-    
+    Set destination_range = get_destination_range(Cells(destination_row, destination_column), _
+            destination_worksheet_name, destination_workbook)
+
     Set pt = create_pivot_table(p_pivot_cache, _
         destination_range, _
         destination_worksheet_name, _
@@ -615,13 +614,10 @@ Function create_pivot_table(pivot_cache As PivotCache, _
         Optional table_name As String) As PivotTable
         
     Dim pivot_table As PivotTable
-    Dim ws As Worksheet
     Dim destination_r1c1 As String
     
     Set destination_wb = get_workbook(destination_wb)
-    
-    Set ws = get_worksheet(destination_wb, destination_ws_name)
-    
+
     table_name = get_unique_table_name(destination_wb, table_name)
     
     If is_pivot_table_overlap(destination_wb, destination_range) Then
@@ -629,7 +625,8 @@ Function create_pivot_table(pivot_cache As PivotCache, _
         Exit Function
     End If
     
-    Set destination_range = ws.Range(destination_range.Address)
+    Set destination_range = get_destination_range(destination_range, destination_ws_name, destination_wb)
+    
     destination_r1c1 = range_to_r1c1(destination_range)
     
     table_name = get_unique_table_name(destination_wb, table_name)
@@ -639,6 +636,19 @@ Function create_pivot_table(pivot_cache As PivotCache, _
     
     Set create_pivot_table = pivot_table
 
+End Function
+
+
+Function get_destination_range(destination_range As Range, _
+        Optional destination_ws_name As String, _
+        Optional destination_wb As Workbook) As Range
+            
+    Dim ws As Worksheet
+    Set destination_wb = get_workbook(destination_wb)
+    Set ws = get_worksheet(destination_wb, destination_ws_name)
+    
+    Set get_destination_range = ws.Range(destination_range.Address)
+    
 End Function
 
 
@@ -717,18 +727,6 @@ Function get_topleft_r1c1(topleft As String) As String
     
 End Function
 
-Function get_destination_range(wb_name As String, ws_name As String, topleft As String) As Range
-    Dim wb As Workbook
-    Dim ws As Worksheet
-    Dim rng As Range
-    
-    Set wb = Workbooks(wb_name)
-    Set ws = wb.Worksheets(ws_name)
-    Set rng = ws.Range(topleft)
-    
-    Set get_destination_range = rng
-    
-End Function
 
 Function range_to_r1c1(rng As Range) As String
     Dim s As String
@@ -740,18 +738,6 @@ Function range_to_r1c1(rng As Range) As String
     range_to_r1c1 = s
     
 End Function
-
-'Function get_destination_r1c1(wb_name As String, ws_name As String, topleft As String) As String
-'    ' Returns full address in R1C1 format
-'    Dim d As String
-'
-'    d = "[" & wb_name & "]"
-'    d = d & ws_name & "!"
-'    d = d & get_topleft_r1c1(topleft)
-'
-'    get_destination_r1c1 = d
-'
-'End Function
 
 
 Function is_pivot_table_name_exists(wb As Workbook, table_name As String) As Boolean

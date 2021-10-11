@@ -980,7 +980,7 @@ Private Function get_unique_table_name(wb As Workbook, table_name As String) As 
     End If
     
     Do While is_pivot_table_name_exists(wb, table_name) = True
-        table_name = get_table_name_suffixed(table_name)
+        table_name = get_incremented_string(table_name)
     Loop
     
     get_unique_table_name = table_name
@@ -988,15 +988,15 @@ Private Function get_unique_table_name(wb As Workbook, table_name As String) As 
 End Function
 
 
-Private Function get_table_name_suffixed(table_name As String) As String
+Private Function get_incremented_string(str As String) As String
     ' Adds/Increments a 2 digit number with a preceding underscore to provided table_name
     
     Dim v As Variant
     
-    v = Split(table_name, "_")
+    v = Split(str, "_")
     
     If UBound(v) = 0 Then
-        get_table_name_suffixed = table_name & "_01"
+        get_incremented_string = str & "_01"
         Exit Function
     End If
     
@@ -1019,13 +1019,13 @@ Private Function get_table_name_suffixed(table_name As String) As String
             s = s & v(i)
         Next i
         s = s & "_" & suffix
-        get_table_name_suffixed = s
+        get_incremented_string = s
         Exit Function
     ElseIf suffix = vbNullString Then
-        get_table_name_suffixed = table_name & "01"
+        get_incremented_string = str & "01"
         Exit Function
     Else
-        get_table_name_suffixed = table_name & "_01"
+        get_incremented_string = str & "_01"
         Exit Function
     End If
     

@@ -199,7 +199,7 @@ End Function
 
 
 Function get_data_function() As XlConsolidationFunction
-    get_data_function = p_get_data_function
+    get_data_function = p_data_function
 End Function
 
 

@@ -587,11 +587,13 @@ Private Function apply_data_pt_fields(ByRef pt As PivotTable, ByRef input_fields
     ReDim output_fields(LBound(input_fields) To UBound(input_fields)) As PivotField
     
     For i = LBound(input_fields) To UBound(input_fields)
-        Set output_fields(i) = pt.AddDataField(input_fields(i).get_field_name_original(), _
-                input_fields(i).get_field_name(), input_fields(i).get_data_function)
+        Set output_fields(i) = pt.AddDataField( _
+                pt.PivotFields(input_fields(i).get_field_name_original()), _
+                input_fields(i).get_field_name(), _
+                input_fields(i).get_data_function)
     Next i
     
-    add_data_pt_fields = output_fields
+    apply_data_pt_fields = output_fields
     
 End Function
 

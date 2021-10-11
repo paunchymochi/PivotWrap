@@ -863,9 +863,45 @@ Function validate_data_field_names() As Boolean
 End Function
 
 
-Private Function validate_source_data(source_data As Range) As Range
+Private Function validate_source_data(ByVal source_data As Range) As Range
+    ' Checks source_data for empty columns and duplicate headers
+    ' Renames duplicated header if found
+    ' Resizes range if extra empty columns and rows are selected
+    ' Returns trimmed Range, or Nothing if range is not valid
     
-    Debug.Assert False
+    Dim d As Scripting.Dictionary
+    Dim header As String
+    Dim i As Long
+    
+    Set d = New Scripting.Dictionary
+    
+    If source_data.columns.Count < 2 Then ' Pivot tables must have at least 2 columns
+        Exit Function
+    End If
+    
+    If source_data.rows.Count < 2 Then ' Pivot tables must have at least 1 data row
+        Exit Function
+    End If
+    
+    ' Use CurrentRegion to eliminate potential empty columns
+    Set source_data = source_data.Resize(1, 1).CurrentRegion
+    
+    ' Check if headers are unique
+    For i = 0 To source_data.columns.Count - 1
+        header = source_data.Resize(1, 1).Offset(0, i).Value
+        If header = vbNullString Then ' Empty header
+            source_data.Value = "Column 1" ' Directly overwrite range with default
+        End If
+        
+        Do While d.Exists(header) ' Increment header name if duplicated
+            header = get_incremented_string(header)
+            source_data.Resize(1, 1).Offset(0, i).Value = header
+        Loop
+        
+        d.Add header, i
+    Next i
+    
+    Set validate_source_data = source_data
     
 End Function
 

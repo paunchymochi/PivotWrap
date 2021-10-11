@@ -629,7 +629,10 @@ Function create_pivot_table(pivot_cache As PivotCache, _
         Exit Function
     End If
     
+    Set destination_range = ws.Range(destination_range.Address)
     destination_r1c1 = range_to_r1c1(destination_range)
+    
+    table_name = get_unique_table_name(destination_wb, table_name)
     
     Set pivot_table = pivot_cache.createPivotTable(TableDestination:=destination_r1c1, _
             TableName:=table_name)

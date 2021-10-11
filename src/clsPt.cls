@@ -69,7 +69,7 @@ Function get_column_names() As String()
 End Function
 
 
-Function print_column_names() As String
+Public Function print_column_names() As String
     Dim names As Variant
     Dim i As Long
     Dim index_str As String
@@ -97,26 +97,26 @@ Function print_column_names() As String
 End Function
 
 
-Function print_row_fields() As String
+Public Function print_row_fields() As String
     print_row_fields = print_dict(row_fields, "Row")
 End Function
 
 
-Function print_column_fields() As String
+Public Function print_column_fields() As String
     print_column_fields = print_dict(column_fields, "Column")
 End Function
 
 
-Function print_data_fields() As String
+Public Function print_data_fields() As String
     print_data_fields = print_dict(data_fields, "Data")
 End Function
 
 
-Function print_page_fields() As String
+Public Function print_page_fields() As String
     print_page_fields = print_dict(page_fields, "Page")
 End Function
 
-Function print_all_fields() As String
+Public Function print_all_fields() As String
     print_row_fields
     print_column_fields
     print_data_fields
@@ -153,22 +153,22 @@ Function validate_data_field_names() As Boolean
 End Function
 
 
-Function get_topright_cell(Optional column_offset As Long, Optional at_page_fields As Boolean) As Range
+Public Function get_topright_cell(Optional column_offset As Long, Optional at_page_fields As Boolean) As Range
     Debug.Assert False
 End Function
 
 
-Function get_bottomleft_cell(Optional row_offset As Long) As Range
+Public Function get_bottomleft_cell(Optional row_offset As Long) As Range
     Debug.Assert False
 End Function
  
 
-Function get_topleft_cell(Optional at_page_fields As Boolean) As Range
+Public Function get_topleft_cell(Optional at_page_fields As Boolean) As Range
     Debug.Assert False
 End Function
 
 
-Sub init(source_data As Range)
+Public Sub init(source_data As Range)
     Set p_source_workbook = source_data.Parent.Parent
     Set p_source_data = source_data
     Set p_pivot_cache = create_pivot_cache(source_data)
@@ -176,12 +176,12 @@ Sub init(source_data As Range)
 End Sub
 
 
-Sub init_with_pivot_cache(pivot_cache As PivotCache)
+Public Sub init_with_pivot_cache(pivot_cache As PivotCache)
     Assert False
 End Sub
 
 
-Sub init_with_pivot_table(pivot_table As PivotTable)
+Public Sub init_with_pivot_table(pivot_table As PivotTable)
     Assert False
 End Sub
 
@@ -217,12 +217,13 @@ End If
 
 End Sub
 
-Function add_row_fields(field_names As Variant, Optional positions As Variant) As clsPtField()
+
+Public Function add_row_fields(field_names As Variant, Optional positions As Variant) As clsPtField()
     Debug.Assert False
 End Function
 
 
-Function add_row_field(field_name As String, _
+Public Function add_row_field(field_name As String, _
         position As Long, _
         Optional key As String, _
         Optional sort_by As String, _
@@ -259,7 +260,7 @@ Function add_row_field(field_name As String, _
 End Function
 
 
-Function add_column_field(field_name As String, _
+Public Function add_column_field(field_name As String, _
         position As Long, _
         Optional key As String, _
         Optional sort_by As String, _
@@ -296,7 +297,7 @@ Function add_column_field(field_name As String, _
 End Function
 
 
-Function add_data_field(field_name As String, _
+Public Function add_data_field(field_name As String, _
         field_name_original As String, _
         position As Long, _
         Optional key As String, _
@@ -329,7 +330,7 @@ Function add_data_field(field_name As String, _
 End Function
 
 
-Function add_page_field(field_name As String, _
+Public Function add_page_field(field_name As String, _
         position As Long, _
         Optional key As String, _
         Optional current_page As String) As clsPtField
@@ -374,7 +375,7 @@ Private Function field_name_exists(field_name As String) As Boolean
 End Function
 
 
-Function create(destination_row As Long, _
+Public Function create(destination_row As Long, _
         destination_column As Long, _
         Optional table_name As String, _
         Optional destination_worksheet_name As String, _
@@ -789,6 +790,7 @@ Err:
     Resume Next
         
 End Function
+
 
 Private Function get_workbook(wb As Variant) As Workbook
     If wb Is Nothing Then

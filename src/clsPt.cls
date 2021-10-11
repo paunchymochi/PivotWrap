@@ -979,7 +979,7 @@ Private Function get_unique_table_name(wb As Workbook, table_name As String) As 
         table_name = "PivotTable"
     End If
     
-    Do While is_pivot_table_name_exists(wb, table_name) = True
+    Do While Not (lookup_pivot_table(wb, table_name) Is Nothing)
         table_name = get_incremented_string(table_name)
     Loop
     
@@ -1066,7 +1066,7 @@ Private Function range_to_r1c1(rng As Range) As String
 End Function
 
 
-Private Function is_pivot_table_name_exists(wb As Workbook, table_name As String) As Boolean
+Private Function lookup_pivot_table(wb As Workbook, table_name As String) As PivotTable
     ' Checks if pivot table name exists in workbook
     
     Dim ws As Worksheet
@@ -1075,13 +1075,11 @@ Private Function is_pivot_table_name_exists(wb As Workbook, table_name As String
     For Each ws In wb.Worksheets
         For Each pivot_table In ws.PivotTables
             If pivot_table.name = table_name Then
-                is_pivot_table_name_exists = True
+                Set lookup_pivot_table = pivot_table
                 Exit Function
             End If
         Next pivot_table
     Next ws
-    
-    is_pivot_table_name_exists = False
     
 End Function
 

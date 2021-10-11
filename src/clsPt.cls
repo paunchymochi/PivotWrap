@@ -375,23 +375,65 @@ Private Function field_name_exists(field_name As String) As Boolean
 End Function
 
 
-Public Function remove_row_field(field_name As String, Optional key As String) As clsPtField
-    Debug.Assert False
+Public Function remove_row_field(field_name As String, Optional is_key As Boolean) As clsPtField
+    Dim pt_field As clsPtField
+    
+    Set pt_field = pop_field(p_row_fields_dict, field_name, is_key)
+    Set remove_row_field = pt_field
+    
 End Function
 
 
-Public Function remove_column_field(field_name As String, Optional key As String) As clsPtField
-    Debug.Assert False
+Public Function remove_column_field(field_name As String, Optional is_key As Boolean) As clsPtField
+    Dim pt_field As clsPtField
+    
+    Set pt_field = pop_field(p_column_fields_dict, field_name, is_key)
+    Set remove_column_field = pt_field
+    
 End Function
 
 
-Public Function remove_page_field(field_name As String, Optional key As String) As clsPtField
-    Debug.Assert False
+Public Function remove_page_field(field_name As String, Optional is_key As Boolean) As clsPtField
+    Dim pt_field As clsPtField
+    
+    Set pt_field = pop_field(p_page_fields_dict, field_name, is_key)
+    Set remove_page_field = pt_field
+    
 End Function
 
 
-Public Function remove_data_field(field_name As String, Optional key As String) As clsPtField
-    Debug.Assert False
+Public Function remove_data_field(field_name As String, Optional is_key As Boolean) As clsPtField
+    Dim pt_field As clsPtField
+    
+    Set pt_field = pop_field(p_data_fields_dict, field_name, is_key)
+    Set remove_data_field = pt_field
+    
+End Function
+
+
+Private Function pop_field(d As Scripting.Dictionary, field_name As String, is_key As Boolean) As clsPtField
+    Dim pt_field As clsPtField
+    Dim i As Long
+    
+    For i = 0 To d.Count - 1
+        Stop
+        If is_key Then
+            If field_name = d.keys(i) Then
+                Set pt_field = d.Items(i)
+                Set pop_field = pt_field
+                d.Remove d.keys(i)
+                Exit Function
+            End If
+        Else
+            Set pt_field = d.Items(i)
+            If pt_field.get_field_name() = field_name Then
+                Set pop_field = pt_field
+                d.Remove d.keys(i)
+                Exit Function
+            End If
+        End If
+    Next i
+    
 End Function
 
 

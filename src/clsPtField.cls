@@ -97,7 +97,7 @@ Sub init_page(field_name As String, _
         position As Long, _
         Optional current_page As String)
     
-    init field_name, field_name_original, xlPageField, posiition
+    init field_name, field_name, xlPageField, position
     
     If current_page = "" Then
         p_current_page = "(All)"

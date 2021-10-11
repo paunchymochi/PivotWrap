@@ -676,6 +676,7 @@ Private Function apply_data_pt_fields(ByRef pt As PivotTable, ByRef input_fields
                 pt.PivotFields(input_fields(i).get_field_name_original()), _
                 input_fields(i).get_field_name(), _
                 input_fields(i).get_data_function)
+        output_fields(i).NumberFormat = input_fields(i).get_data_number_format()
     Next i
     
     apply_data_pt_fields = output_fields

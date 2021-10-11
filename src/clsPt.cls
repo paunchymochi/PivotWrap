@@ -642,10 +642,13 @@ Public Function update(destination_row As Long, _
     
     Set destination_workbook = get_workbook(destination_workbook)
     
-    pt = lookup_pivot_table(destination_workbook, table_name)
+    Set pt = lookup_pivot_table(destination_workbook, table_name)
     
     If Not (pt Is Nothing) Then ' pt with table_name found; delete pt
         pt.TableRange2.Clear
+        Set pt = Nothing
+        
+        Set p_pivot_cache = create_pivot_cache(p_source_data) ' pivot cache is deleted automatically if no pivot table references it
     End If
     
     ' call create

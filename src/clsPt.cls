@@ -266,8 +266,80 @@ End If
 End Sub
 
 
-Public Function add_row_fields(field_names As Variant, Optional positions As Variant) As clsPtField()
-    Debug.Assert False
+Public Function add_row_fields(field_names As Variant, _
+        Optional keys As Variant, _
+        Optional positions As Variant) As clsPtField()
+    ' Add multiple row fields by providing an array of field_names
+    ' returns array of clsPtFields
+    
+    Dim i As Long
+    Dim position_arr() As Long
+    Dim key_arr() As String
+    Dim use_keys As Boolean
+    Dim use_positions As Boolean
+    
+    ' Convert parameters to array
+    If Not IsArray(field_names) Then field_names = Array(field_names)
+    If Not IsArray(keys) Then keys = Array(keys)
+    If Not IsArray(positions) Then positions = Array(positions)
+    
+    ' Make sure lengths of keys and positions (if not empty) match length of field_names
+    If Not IsMissing(keys(0)) Then
+        If UBound(keys) <> UBound(field_names) Then
+            MsgBox "Length of keys must be the same as length of field_names"
+            Exit Function
+        Else
+            use_keys = True
+        End If
+    Else
+        use_keys = False
+    End If
+    
+    If Not IsMissing(positions(0)) Then
+        If UBound(positions) <> UBound(field_names) Then
+            MsgBox "Length of positions must be the same as length of field_names"
+            Exit Function
+        Else
+            ' Make sure positions are numeric
+            For i = LBound(positions) To UBound(positions)
+                If Not IsNumeric(positions(i)) Then
+                    MsgBox "Positions argument must numeric or an array of numbers"
+                    Exit Function
+                End If
+            Next i
+            use_positions = True
+        End If
+    Else
+        use_positions = False
+    End If
+    
+    ReDim key_arr(LBound(field_names) To UBound(field_names)) As String
+    ReDim position_arr(LBound(field_names) To UBound(field_names)) As Long
+    
+    ' populate position_arr and key_arr
+    For i = LBound(field_names) To UBound(field_names)
+        
+        ' use provided keys if valid, otherwise use field_name as keys
+        If use_keys Then
+            key_arr(i) = keys(i)
+        Else
+            key_arr(i) = field_names(i)
+        End If
+        
+        ' use provided positions if valid, otherwise use i as position
+        If use_positions Then
+            position_arr(i) = positions(i)
+        Else
+            position_arr(i) = i + 1
+        End If
+    Next i
+        
+    
+    For i = LBound(field_names) To UBound(field_names)
+        add_row_field CStr(field_names(i)), CLng(positions(i))
+    Next i
+
+
 End Function
 
 

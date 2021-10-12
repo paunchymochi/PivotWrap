@@ -640,8 +640,8 @@ Public Function clear_data_fields() As Boolean
 End Function
 
 
-Public Function create(destination_row As Long, _
-        destination_column As Long, _
+Public Function create(Optional destination_row As Long, _
+        Optional destination_column As Long, _
         Optional table_name As String, _
         Optional destination_worksheet_name As String, _
         Optional destination_workbook As Workbook, _
@@ -667,8 +667,12 @@ Public Function create(destination_row As Long, _
     Dim out_datas() As PivotField
     Dim out_pages() As PivotField
     
+    ' Set workbook and worksheet
     Set destination_workbook = get_workbook(destination_workbook)
     Set destination_worksheet = get_worksheet(destination_workbook, destination_worksheet_name)
+    
+    ' Set destination row and column; find next free row/column if row/column is not provided
+    validate_destination_range destination_row, destination_column, destination_worksheet
     
     Set destination_range = get_destination_range(Cells(destination_row, destination_column), _
             destination_worksheet_name, destination_workbook)
@@ -1077,6 +1081,40 @@ Private Function validate_source_data(ByVal source_data As Range) As Range
     
     Set validate_source_data = source_data
     
+End Function
+
+
+Private Function validate_destination_range( _
+        ByRef destination_row As Long, _
+        ByRef destination_column As Long, _
+        ByRef destination_ws As Worksheet) As Boolean
+    ' Destination row and column are optional. If their value is 0 (i.e. not provided),
+    ' then find the next free row/column with 1 cell padding
+    
+    ' Used in create()
+    
+    ' Overwrites destination_row and destination_column with validated values
+    
+    Dim used_rows As Long
+    Dim used_columns As Long
+    
+    With Range(destination_ws.[A1], destination_ws.UsedRange)
+        used_rows = .rows.Count
+        used_columns = .columns.Count
+    End With
+    
+    If destination_row = 0 And destination_column = 0 Then
+        destination_row = 3
+    End If
+    
+    If destination_row = 0 Then
+        destination_row = used_rows + 2
+    End If
+    
+    If destination_column = 0 Then
+        destination_column = used_columns + 2
+    End If
+        
 End Function
 
 

@@ -221,6 +221,7 @@ Private Sub init_dicts()
     Set p_column_fields_dict = New Scripting.Dictionary
     Set p_data_fields_dict = New Scripting.Dictionary
     Set p_page_fields_dict = New Scripting.Dictionary
+    Set p_pivot_tables_dict = New Scripting.Dictionary
 End Sub
 
 

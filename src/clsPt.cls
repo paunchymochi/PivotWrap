@@ -31,7 +31,7 @@ Private p_pt_null_string As String
 Private p_pt_display_error_string As Boolean
 Private p_pt_display_null_string As Boolean
 
-
+' === Public Property Accessors for Dictionaries ===
 Public Property Get row_fields() As Scripting.Dictionary
     Set row_fields = p_row_fields_dict
 End Property
@@ -55,37 +55,67 @@ End Property
 Public Property Get pivot_tables() As Scripting.Dictionary
     Set pivot_tables = p_pivot_tables_dict
 End Property
+' =====
 
 
-Function get_source_data() As Range
+' === Public Get Property Functions ===
+Public Function get_source_data() As Range
     Set get_source_data = p_source_data
 End Function
 
 
-Function get_source_workbook() As Workbook
+Public Function get_source_workbook() As Workbook
     Set get_source_workbook = p_source_workbook
 End Function
  
 
-Function get_pivot_cache() As PivotCache
+Public Function get_pivot_cache() As PivotCache
     Set get_pivot_cache = p_pivot_cache
 End Function
 
 
-Function get_column_names() As String()
-    Dim strings() As String
-    Dim i As Long
-    
-    ReDim strings(0 To p_source_data.columns.Count - 1) As String
-    For i = 0 To UBound(strings)
-        strings(i) = p_source_data.Cells(1, 1 + i).Value
-    Next i
-    
-    get_column_names = strings
-    
+Public Function get_datapivot_field_orientation() As XlPivotFieldOrientation
+    get_datapivot_field_orientation = p_datapivot_field_orientation
 End Function
 
 
+Public Function get_datapivot_field_position() As Long
+    get_datapivot_field_position = p_datapivot_field_position
+End Function
+
+
+Public Function get_pt_row_grand_visible() As Boolean
+    get_pt_row_grand_visible = p_pt_row_grand_visible
+End Function
+
+
+Public Function get_pt_column_grand_visible() As Boolean
+    get_pt_column_grand_visible = p_pt_column_grand_visible
+End Function
+
+
+Public Function get_pt_error_string() As String
+    get_pt_error_string = p_pt_error_string
+End Function
+
+
+Public Function get_pt_null_string() As String
+    get_pt_null_string = p_pt_null_string
+End Function
+
+
+Public Function get_pt_display_error_string() As Boolean
+    get_pt_display_error_string = p_pt_display_error_string
+End Function
+
+
+Public Function get_pt_display_null_string() As Boolean
+    get_pt_display_null_string = p_pt_display_null_string
+End Function
+' =====
+
+
+' === Immediate Window-Friendly Print Functions ===
 Public Function print_column_names() As String
     ' Print all column names (i.e. available pivot table fields) from data source
     Dim names As Variant
@@ -169,6 +199,21 @@ Private Function print_dict(dict As Scripting.Dictionary, field_orientation As S
     print_dict = s
         
 End Function
+' =====
+
+
+Public Function get_column_names() As String()
+    Dim strings() As String
+    Dim i As Long
+    
+    ReDim strings(0 To p_source_data.columns.Count - 1) As String
+    For i = 0 To UBound(strings)
+        strings(i) = p_source_data.Cells(1, 1 + i).Value
+    Next i
+    
+    get_column_names = strings
+    
+End Function
 
 
 Public Function get_topright_cell(Optional column_offset As Long, Optional at_page_fields As Boolean) As Range
@@ -247,22 +292,21 @@ Sub setup(Optional ByVal row_fields As Variant, _
         Optional ByVal column_fields As Variant, _
         Optional ByVal data_fields As Variant, _
         Optional ByVal page_fields As Variant)
-' rows, columns, data, filters
-'
-
-If IsArray(row_fields) = False Then
-    row_fields = Array(row_fields)
-End If
-If IsArray(column_fields) = False Then
-    column_fields = Array(column_fields)
-End If
-If IsArray(data_fields) = False Then
-    data_fields = Array(data_fields)
-End If
-If IsArray(page_fields) = False Then
-    page_fields = Array(page_fields)
-End If
-
+    ' rows, columns, data, filters
+    '
+    
+    If IsArray(row_fields) = False Then
+        row_fields = Array(row_fields)
+    End If
+    If IsArray(column_fields) = False Then
+        column_fields = Array(column_fields)
+    End If
+    If IsArray(data_fields) = False Then
+        data_fields = Array(data_fields)
+    End If
+    If IsArray(page_fields) = False Then
+        page_fields = Array(page_fields)
+    End If
 
 End Sub
 
@@ -1090,6 +1134,7 @@ Private Function validate_destination_range( _
         ByRef destination_ws As Worksheet) As Boolean
     ' Destination row and column are optional. If their value is 0 (i.e. not provided),
     ' then find the next free row/column with 1 cell padding
+    ' If both row and column are 0, then row is set to 3 while column is the next free column
     
     ' Used in create()
     

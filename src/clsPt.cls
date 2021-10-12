@@ -187,6 +187,7 @@ End Function
 
 
 Public Sub init(ByVal source_data As Range)
+
     ' Initialize class using source data
     Set source_data = validate_source_data(source_data)
     
@@ -699,7 +700,7 @@ Public Function create(destination_row As Long, _
     
     apply_pt_formatting pt, out_rows, out_columns
     
-    apply_datapivot_field pt, out_rows, out_columns
+    apply_datapivot_field pt, out_rows, out_columns, out_datas
     
     update_pivot_table_dict pt
     
@@ -766,6 +767,11 @@ Private Function apply_rowcol_filter(cls_pt_fields() As clsPtField, pt_fields() 
     Dim pt_field As PivotField
     Dim i As Long
     
+    If UBound(cls_pt_fields) = -1 Then ' empty cls_pt_fields
+        apply_rowcol_filter = False
+        Exit Function
+    End If
+    
     For i = LBound(cls_pt_fields) To UBound(cls_pt_fields)
         Set cls_pt_field = cls_pt_fields(i)
         If cls_pt_field.get_rowcol_filter_type <> 0 Then ' pt field with no filter has filter type value of 0
@@ -777,6 +783,8 @@ Private Function apply_rowcol_filter(cls_pt_fields() As clsPtField, pt_fields() 
                         Value2:=cls_pt_field.get_rowcol_filter_value2()
         End If
     Next i
+    
+    apply_rowcol_filter = True
                         
 End Function
 
@@ -795,6 +803,11 @@ Private Function apply_page_filter(cls_pt_fields() As clsPtField, pt_fields() As
     Dim i As Long
     Dim j As Long
     Dim match_found As Boolean
+    
+    If UBound(cls_pt_fields) = -1 Then ' empty cls_pt_fields
+        apply_page_filter = False
+        Exit Function
+    End If
     
     For i = LBound(cls_pt_fields) To UBound(cls_pt_fields)
         Set cls_pt_field = cls_pt_fields(i)
@@ -824,6 +837,8 @@ Private Function apply_page_filter(cls_pt_fields() As clsPtField, pt_fields() As
             pt_field.CurrentPage = cls_pt_field.get_current_page()
         End If
     Next i
+    
+    apply_page_filter = True
 
 End Function
 
@@ -842,19 +857,25 @@ Private Function apply_pt_formatting(pt As PivotTable, row_fields() As PivotFiel
     pt.ErrorString = p_pt_error_string
     pt.NullString = p_pt_null_string
     
-    Debug.Assert False
 End Function
 
 
 Private Function apply_datapivot_field(ByRef pt As PivotTable, _
         row_fields() As PivotField, _
-        column_fields() As PivotField) As Boolean
+        column_fields() As PivotField, _
+        data_fields() As PivotField) As Boolean
     ' Sets data pivot field orientation and position in pt
     ' Called by create()
     
     Dim o As XlPivotFieldOrientation
     Dim p As Long
     Dim last_position As Long
+    
+    ' Do nothing if data_fields is empty
+    If UBound(data_fields) = -1 Then
+        apply_datapivot_field = False
+        Exit Function
+    End If
     
     o = p_datapivot_field_orientation
     p = p_datapivot_field_position
@@ -871,6 +892,8 @@ Private Function apply_datapivot_field(ByRef pt As PivotTable, _
         Debug.Assert False ' Unknown orientation
     End If
     
+    last_position = Application.WorksheetFunction.Max(1, last_position) ' set minimum to 1
+    
     If p = 0 Or p > last_position Then ' default to last place
         p = last_position
     End If
@@ -879,6 +902,8 @@ Private Function apply_datapivot_field(ByRef pt As PivotTable, _
         .Orientation = o
         .Position = p
     End With
+    
+    apply_datapivot_field = True
     
 End Function
 
@@ -889,6 +914,12 @@ Private Function apply_rowcolpage_pt_fields(ByRef pt As PivotTable, ByRef input_
     
     Dim i As Long
     Dim output_fields() As PivotField
+    
+    If UBound(input_fields) = -1 Then ' empty input_fields
+        ReDim output_fields(-1 To -1) As PivotField
+        apply_rowcolpage_pt_fields = output_fields
+        Exit Function
+    End If
     
     ReDim output_fields(LBound(input_fields) To UBound(input_fields)) As PivotField
     
@@ -909,6 +940,12 @@ Private Function apply_data_pt_fields(ByRef pt As PivotTable, ByRef input_fields
     
     Dim i As Long
     Dim output_fields() As PivotField
+    
+    If UBound(input_fields) = -1 Then ' empty input_fields
+        ReDim output_fields(-1 To -1) As PivotField
+        apply_data_pt_fields = output_fields
+        Exit Function
+    End If
     
     ReDim output_fields(LBound(input_fields) To UBound(input_fields)) As PivotField
     
@@ -934,6 +971,12 @@ Private Function populate_input_fields(dict As Scripting.Dictionary, Optional ke
     Dim arr() As clsPtField
     Dim key As Variant
     Dim i As Long
+    
+    If dict.Count = 0 Then ' No ptFields in dictionary
+        ReDim arr(-1 To -1) As clsPtField
+        populate_input_fields = arr
+        Exit Function
+    End If
     
     If IsEmpty(keys) Or IsMissing(keys) Then 'use all ptFields in dictionary, and sort by ptFields.position
         ReDim arr(0 To dict.Count - 1) As clsPtField

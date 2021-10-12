@@ -13,11 +13,12 @@ Private p_pivot_cache As PivotCache
 Private p_source_workbook As Workbook
 Private p_source_data As Range
 
+Private p_pivot_tables_dict As Scripting.Dictionary
+
 Private p_row_fields_dict As Scripting.Dictionary
 Private p_column_fields_dict As Scripting.Dictionary
 Private p_data_fields_dict As Scripting.Dictionary
 Private p_page_fields_dict As Scripting.Dictionary
-Private d As Scripting.Dictionary
 
 Private p_datapivot_field_orientation As XlPivotFieldOrientation
 Private p_datapivot_field_position As Long
@@ -48,6 +49,11 @@ End Property
 
 Public Property Get page_fields() As Scripting.Dictionary
     Set page_fields = p_page_fields_dict
+End Property
+
+
+Public Property Get pivot_tables() As Scripting.Dictionary
+    Set pivot_tables = p_pivot_tables_dict
 End Property
 
 
@@ -622,6 +628,8 @@ Public Function create(destination_row As Long, _
     
     apply_datapivot_field pt, out_rows, out_columns
     
+    update_pivot_table_dict pt
+    
     Debug.Assert False
 
 End Function
@@ -657,6 +665,22 @@ Public Function update(destination_row As Long, _
             destination_workbook, row_keys, column_keys, _
             data_keys, page_keys
 
+End Function
+
+
+Private Function update_pivot_table_dict(pt As PivotTable) As Boolean
+    Dim table_name As String
+    
+    table_name = pt.name
+    
+    If p_pivot_tables_dict.Exists(table_name) Then
+        p_pivot_tables_dict.Remove table_name
+    End If
+    
+    p_pivot_tables_dict.Add table_name, pt
+    
+    update_pivot_table_dict = True
+    
 End Function
         
 

@@ -857,20 +857,21 @@ Public Function create(Optional destination_row As Long, _
     ' Inserts new pivot table into provided location
     ' Can override fields selection and positions by providing row, column, data, or page keys in parameter
     ' Aborts if location overlaps with an existing pivot table
+    ' Returns created pivot table
     
     Dim pt As PivotTable
     Dim destination_range As Range
     Dim destination_worksheet As Worksheet
     
-    Dim in_rows() As clsPtField
-    Dim in_columns() As clsPtField
-    Dim in_datas() As clsPtField
-    Dim in_pages() As clsPtField
+    Dim clsPtField_rows() As clsPtField
+    Dim clsPtField_columns() As clsPtField
+    Dim clsPtField_datas() As clsPtField
+    Dim clsPtField_pages() As clsPtField
     
-    Dim out_rows() As PivotField
-    Dim out_columns() As PivotField
-    Dim out_datas() As PivotField
-    Dim out_pages() As PivotField
+    Dim ptField_rows() As PivotField
+    Dim ptField_columns() As PivotField
+    Dim ptField_datas() As PivotField
+    Dim ptField_pages() As PivotField
     
     ' Set workbook and worksheet
     Set destination_workbook = get_workbook(destination_workbook)
@@ -881,7 +882,8 @@ Public Function create(Optional destination_row As Long, _
     
     Set destination_range = get_destination_range(Cells(destination_row, destination_column), _
             destination_worksheet_name, destination_workbook)
-
+    
+    ' Create empty pivot table
     Set pt = create_pivot_table(p_pivot_cache, _
         destination_range, _
         destination_worksheet_name, _
@@ -892,28 +894,35 @@ Public Function create(Optional destination_row As Long, _
         Exit Function
     End If
     
-    in_rows = populate_input_fields(p_row_fields_dict, row_keys, "Row Fields")
-    in_columns = populate_input_fields(p_column_fields_dict, column_keys, "Column Fields")
-    in_datas = populate_input_fields(p_data_fields_dict, data_keys, "Data Fields")
-    in_pages = populate_input_fields(p_page_fields_dict, page_keys, "Page Fields")
+    ' Retrieve clsPtFields arrays, sorted by position
+    clsPtField_rows = populate_input_fields(p_row_fields_dict, row_keys, "Row Fields")
+    clsPtField_columns = populate_input_fields(p_column_fields_dict, column_keys, "Column Fields")
+    clsPtField_datas = populate_input_fields(p_data_fields_dict, data_keys, "Data Fields")
+    clsPtField_pages = populate_input_fields(p_page_fields_dict, page_keys, "Page Fields")
     
-    out_rows = apply_rowcolpage_pt_fields(pt, in_rows)
-    out_columns = apply_rowcolpage_pt_fields(pt, in_columns)
-    out_pages = apply_rowcolpage_pt_fields(pt, in_pages)
-    out_datas = apply_data_pt_fields(pt, in_datas)
+    ' Add clsPtFields to pivot table, return arrays of PivotField
+    ptField_rows = apply_rowcolpage_pt_fields(pt, clsPtField_rows)
+    ptField_columns = apply_rowcolpage_pt_fields(pt, clsPtField_columns)
+    ptField_pages = apply_rowcolpage_pt_fields(pt, clsPtField_pages)
+    ptField_datas = apply_data_pt_fields(pt, clsPtField_datas)
     
-    apply_rowcol_filter in_rows, out_rows
-    apply_rowcol_filter in_columns, out_columns
+    ' Set row/column filters (i.e. top 10, label filter, value filter) in pivot table
+    apply_rowcol_filter clsPtField_rows, ptField_rows
+    apply_rowcol_filter clsPtField_columns, ptField_columns
     
-    apply_page_filter in_pages, out_pages
+    ' Set page filters (i.e. current page(s)) in pivot table
+    apply_page_filter clsPtField_pages, ptField_pages
     
-    apply_pt_formatting pt, out_rows, out_columns
+    ' Set pivot table formatting (i.e. PivotTable Options menu)
+    apply_pt_options pt, ptField_rows, ptField_columns
     
-    apply_datapivot_field pt, out_rows, out_columns, out_datas
+    ' Set data pivot field (i.e. Sigma Value in Field List)
+    apply_datapivot_field pt, ptField_rows, ptField_columns, ptField_datas
     
+    ' Add pivot table to dictionary
     update_pivot_table_dict pt
     
-    Debug.Assert False
+    Set create = pt
 
 End Function
 
@@ -1052,7 +1061,7 @@ Private Function apply_page_filter(cls_pt_fields() As clsPtField, pt_fields() As
 End Function
 
 
-Private Function apply_pt_formatting(pt As PivotTable, row_fields() As PivotField, column_fields() As PivotField) As Boolean
+Private Function apply_pt_options(pt As PivotTable, row_fields() As PivotField, column_fields() As PivotField) As Boolean
     ' Applies general pivot table formatting (blank spaces, error/null string display, grand totals, subtotals
     ' Called by create()
     

@@ -1093,8 +1093,8 @@ Private Function apply_datapivot_field(ByRef pt As PivotTable, _
     Dim p As Long
     Dim last_position As Long
     
-    ' Do nothing if data_fields is empty
-    If UBound(data_fields) = -1 Then
+    ' Do nothing if data_fields is empty or if data_fields has only 1 element
+    If UBound(data_fields) <= 0 Then
         apply_datapivot_field = False
         Exit Function
     End If

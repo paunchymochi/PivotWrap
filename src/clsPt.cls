@@ -310,6 +310,7 @@ Sub setup(Optional ByVal row_fields As Variant, _
 
 End Sub
 
+
 Private Function get_position_array(ByRef field_names As Variant, _
         ByRef positions As Variant, _
         ByRef field_orientation_name As String) As Long()
@@ -528,7 +529,8 @@ Public Function add_row_field(field_name As String, _
         Optional filter_type As XlPivotFilterType, _
         Optional filter_by_field_name As String, _
         Optional filter_value1 As String, _
-        Optional filter_value2 As String) As clsPtField
+        Optional filter_value2 As String, _
+        Optional manual_filter_values As Variant) As clsPtField
     ' Add new row field and store it in p_row_fields_dict
     ' Return the new row field
     
@@ -550,7 +552,8 @@ Public Function add_row_field(field_name As String, _
             filter_type, _
             filter_by_field_name, _
             filter_value1, _
-            filter_value2
+            filter_value2, _
+            manual_filter_values
     
 
     p_row_fields_dict.Add key, ptfield
@@ -567,7 +570,8 @@ Public Function add_column_field(field_name As String, _
         Optional filter_type As XlPivotFilterType, _
         Optional filter_by_field_name As String, _
         Optional filter_value1 As String, _
-        Optional filter_value2 As String) As clsPtField
+        Optional filter_value2 As String, _
+        Optional manual_filter_values As Variant) As clsPtField
     ' Add new column field and store it in p_row_fields_dict
     ' Return the new column field
     
@@ -589,7 +593,8 @@ Public Function add_column_field(field_name As String, _
             filter_type, _
             filter_by_field_name, _
             filter_value1, _
-            filter_value2
+            filter_value2, _
+            manual_filter_values
     
     p_column_fields_dict.Add key, ptfield
     Set add_column_field = ptfield
@@ -914,6 +919,10 @@ Public Function create(Optional destination_row As Long, _
     apply_rowcol_sort clsPtField_rows, ptField_rows
     apply_rowcol_sort clsPtField_columns, ptField_columns
     
+    ' Set row/column manual filter (i.e. the list box with check marks in the row/column drop-down menu)
+    apply_rowcol_manual_filter clsPtField_rows, ptField_rows
+    apply_rowcol_manual_filter clsPtField_columns, ptField_columns
+    
     ' Set row/column filters (i.e. top 10, label filter, value filter) in pivot table
     apply_rowcol_filter clsPtField_rows, ptField_rows
     apply_rowcol_filter clsPtField_columns, ptField_columns
@@ -1008,7 +1017,6 @@ Private Function apply_rowcol_sort(cls_pt_fields() As clsPtField, pt_fields() As
     Next i
 
 End Function
-        
 
 
 Private Function apply_rowcol_filter(cls_pt_fields() As clsPtField, pt_fields() As PivotField) As Boolean
@@ -1037,7 +1045,78 @@ Private Function apply_rowcol_filter(cls_pt_fields() As clsPtField, pt_fields() 
     Next i
     
     apply_rowcol_filter = True
-                        
+
+End Function
+
+
+Private Function apply_rowcol_manual_filter(cls_pt_fields() As clsPtField, pt_fields() As PivotField) As Boolean
+    ' Applies manual filter for row/column
+    ' Called by create()
+    
+    Dim cls_pt_field As clsPtField
+    Dim pt_field As PivotField
+    
+    Dim pivot_item As PivotItem
+    Dim pivot_item_name As String
+    
+    Dim manual_filter_values As Variant
+        
+    Dim i As Long
+    Dim j As Long
+    Dim match_found As Boolean
+    
+    If UBound(cls_pt_fields) = -1 Then ' empty cls_pt_fields
+        apply_rowcol_manual_filter = False
+        Exit Function
+    End If
+    
+    For i = LBound(cls_pt_fields) To UBound(cls_pt_fields)
+        Set cls_pt_field = cls_pt_fields(i)
+        Set pt_field = pt_fields(i)
+        
+        manual_filter_values = cls_pt_field.get_rowcol_manual_filter_values()
+        
+        If Not IsArray(manual_filter_values) Then ' convert single string item into array
+            manual_filter_values = Array(manual_filter_values)
+        End If
+        
+        If Not manual_filter_values(0) = vbNullString Then ' filter is specified
+        
+            ' Convert values to lower case
+            For j = LBound(manual_filter_values) To UBound(manual_filter_values)
+                manual_filter_values(j) = LCase(manual_filter_values(j))
+            Next j
+            
+            Application.Calculation = xlCalculationManual
+            Application.ScreenUpdating = False
+            pt_field.Parent.ManualUpdate = True
+            
+            ' Loop through each pivot_item, set visible to True if match_found
+            For Each pivot_item In pt_field.PivotItems
+                pivot_item_name = LCase(pivot_item.name)
+                match_found = False
+                
+                For j = LBound(manual_filter_values) To UBound(manual_filter_values)
+                    If pivot_item_name = manual_filter_values(j) Then
+                        match_found = True
+                        Exit For
+                    End If
+                Next j
+                
+                pivot_item.Visible = match_found
+                
+            Next pivot_item
+            
+            Application.Calculation = xlCalculationAutomatic
+            Application.ScreenUpdating = True
+            pt_field.Parent.ManualUpdate = False
+            
+        End If
+    Next i
+    
+    apply_rowcol_manual_filter = True
+    
+    
 End Function
 
 
@@ -1071,26 +1150,42 @@ Private Function apply_page_filter(cls_pt_fields() As clsPtField, pt_fields() As
         If IsArray(current_page) Then
             ' multiple page items filter
             pt_field.EnableMultiplePageItems = True
+            
+            Application.Calculation = xlCalculationManual
+            Application.ScreenUpdating = False
+            pt_field.Parent.ManualUpdate = True
+            
+            ' Loop through each pivot_item, set visible to True if match_found
             For Each pivot_item In pt_field.PivotItems
                 pivot_item_name = pivot_item.name
                 match_found = False
+                
                 For j = LBound(current_page) To UBound(current_page)
                     If pivot_item_name = current_page(j) Then
                         match_found = True
                         Exit For
                     End If
                 Next j
+                
                 pivot_item.Visible = match_found
+                
             Next pivot_item
+            
+            Application.Calculation = xlCalculationAutomatic
+            Application.ScreenUpdating = True
+            pt_field.Parent.ManualUpdate = False
+
         
         ElseIf cls_pt_field.get_current_page() <> vbNullString Then
             ' single page item filter
-            
-            pt_field.CurrentPage = cls_pt_field.get_current_page()
+            On Error Resume Next ' Do nothing if current_page is not found
+                pt_field.CurrentPage = current_page
+            On Error GoTo 0
         End If
     Next i
     
     apply_page_filter = True
+    Exit Function
 
 End Function
 

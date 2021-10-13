@@ -525,7 +525,7 @@ Public Function add_row_field(field_name As String, _
         position As Long, _
         Optional key As String, _
         Optional sort_by As String, _
-        Optional sort_order As XlSortOrder, _
+        Optional sort_order As XlSortOrder = xlAscending, _
         Optional filter_type As XlPivotFilterType, _
         Optional filter_by_field_name As String, _
         Optional filter_value1 As String, _
@@ -566,7 +566,7 @@ Public Function add_column_field(field_name As String, _
         position As Long, _
         Optional key As String, _
         Optional sort_by As String, _
-        Optional sort_order As XlSortOrder, _
+        Optional sort_order As XlSortOrder = xlAscending, _
         Optional filter_type As XlPivotFilterType, _
         Optional filter_by_field_name As String, _
         Optional filter_value1 As String, _

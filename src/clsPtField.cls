@@ -22,6 +22,8 @@ Private p_rowcol_filter_by_field_name As String
 Private p_rowcol_filter_value1 As String
 Private p_rowcol_filter_value2 As String
 
+Private p_rowcol_manual_filter_values As Variant
+
 Private p_data_function As XlConsolidationFunction
 Private p_data_calculation As XlPivotFieldCalculation
 Private p_data_number_format As String
@@ -38,12 +40,13 @@ Sub init_row(field_name As String, _
         Optional filter_type As XlPivotFilterType, _
         Optional filter_by_field_name As String, _
         Optional filter_value1 As String, _
-        Optional filter_value2 As String)
+        Optional filter_value2 As String, _
+        Optional manual_filter_values As Variant)
     ' Initialize Row Field
         
     init_rowcol field_name, xlRowField, position, _
             sort_by, sort_order, filter_type, filter_by_field_name, _
-            filter_value1, filter_value2
+            filter_value1, filter_value2, manual_filter_values
     
 End Sub
 
@@ -55,12 +58,13 @@ Sub init_col(field_name As String, _
         Optional filter_type As XlPivotFilterType, _
         Optional filter_by_field_name As String, _
         Optional filter_value1 As String, _
-        Optional filter_value2 As String)
+        Optional filter_value2 As String, _
+        Optional manual_filter_values As Variant)
     ' Initialize Column Field
     
     init_rowcol field_name, xlColumnField, position, _
             sort_by, sort_order, filter_type, filter_by_field_name, _
-            filter_value1, filter_value2
+            filter_value1, filter_value2, manual_filter_values
     
 End Sub
 
@@ -76,21 +80,21 @@ Sub init_data(field_name As String, _
     init field_name, source_field_name, xlDataField, position
     
     If data_function = 0 Then
-        p_data_function = xlSum
+        set_data_function xlSum
     Else
-        p_data_function = data_function
+        set_data_function data_function
     End If
     
     If data_calculation = 0 Then
-        p_data_calculation = xlNoAdditionalCalculation
+        set_data_calculation xlNoAdditionalCalculation
     Else
-        p_data_calculation = data_calculation
+        set_data_calculation data_calculation
     End If
     
     If data_number_format = "" Then
-        p_data_number_format = "General"
+        set_data_number_format "General"
     Else
-        p_data_number_format = data_number_format
+        set_data_number_format data_number_format
     End If
 
 End Sub
@@ -98,15 +102,15 @@ End Sub
 
 Sub init_page(field_name As String, _
         position As Long, _
-        Optional current_page As String)
+        Optional current_page As Variant)
     ' Initialize Page Field
     
     init field_name, field_name, xlPageField, position
     
-    If current_page = "" Then
-        p_current_page = "(All)"
+    If IsMissing(current_page) Or current_page = "" Then
+        set_current_page "(All)"
     Else
-        p_current_page = current_page
+        set_current_page current_page
     End If
     
 End Sub
@@ -120,23 +124,30 @@ Private Sub init_rowcol(field_name As String, _
         Optional filter_type As XlPivotFilterType, _
         Optional filter_by_field_name As String, _
         Optional filter_value1 As String, _
-        Optional filter_value2 As String)
+        Optional filter_value2 As String, _
+        Optional manual_filter_values As Variant)
     ' Shared code for initializing Row and Column Fields
         
     init field_name, field_name, orientation, position
     
-    p_rowcol_sort_by = sort_by
+    set_rowcol_sort_by_field_name sort_by
     
     If sort_order = 0 Then
-        p_rowcol_sort_order = 1
+        set_rowcol_sort_order xlAscending
     Else
-        p_rowcol_sort_order = sort_order
+        set_rowcol_sort_order sort_order
     End If
     
-    p_rowcol_filter_type = filter_type
-    p_rowcol_filter_by_field_name = filter_by_field_name
-    p_rowcol_filter_value1 = filter_value1
-    p_rowcol_filter_value2 = filter_value2
+    set_rowcol_filter_type filter_type
+    set_rowcol_filter_by_field_name filter_by_field_name
+    set_rowcol_filter_value1 filter_value1
+    set_rowcol_filter_value2 filter_value2
+    
+    If IsMissing(manual_filter_values) Then
+        set_rowcol_manual_filter_values ""
+    Else
+        set_rowcol_manual_filter_values manual_filter_values
+    End If
     
 End Sub
 
@@ -147,10 +158,10 @@ Private Sub init(field_name As String, _
         position As Long)
     ' Shared code for initializing all 4 field orientations
     
-    p_field_name = field_name
-    p_source_field_name = source_field_name
-    p_orientation = orientation
-    p_position = position
+    set_field_name field_name
+    set_source_field_name source_field_name
+    set_orientation orientation
+    set_position position
     
 End Sub
 
@@ -160,7 +171,7 @@ Public Function get_orientation() As XlPivotFieldOrientation
 End Function
 
 
-Public Function set_orientation(orientation As XlPivotFieldOrientation) As Boolean
+Private Function set_orientation(orientation As XlPivotFieldOrientation) As Boolean
     Dim allowed_values As Variant
     Dim i As Long
     
@@ -189,8 +200,34 @@ Public Function get_field_name() As String
 End Function
 
 
+Private Function set_field_name(field_name As String) As Boolean
+    If field_name = vbNullString Then
+        MsgBox "Field Name cannot be empty"
+        set_field_name = False
+        Exit Function
+    End If
+    
+    p_field_name = field_name
+    set_field_name = True
+    
+End Function
+
+
 Public Function get_source_field_name() As String
     get_source_field_name = p_source_field_name
+End Function
+
+
+Private Function set_source_field_name(source_field_name As String) As Boolean
+    If source_field_name = vbNullString Then
+        MsgBox "Source Field Name cannot be empty"
+        set_source_field_name = False
+        Exit Function
+    End If
+    
+    p_source_field_name = source_field_name
+    set_source_field_name = True
+    
 End Function
 
 
@@ -230,7 +267,7 @@ End Function
 
 
 Public Function get_rowcol_sort_by_field_name() As String
-    get_rowcol_sort_by = p_rowcol_sort_by
+    get_rowcol_sort_by_field_name = p_rowcol_sort_by
 End Function
 
 
@@ -312,6 +349,40 @@ Public Function set_rowcol_filter(filter_type As XlPivotFilterType, _
     ans = ans And set_rowcol_filter_value2(filter_value2)
     
     set_rowcol_filter = ans
+    
+End Function
+
+
+Public Function get_rowcol_manual_filter_values() As Variant
+    get_rowcol_manual_filter_values = p_rowcol_manual_filter_values
+End Function
+
+
+Public Function set_rowcol_manual_filter_values(filter_values As Variant) As Boolean
+    Dim arr() As String
+    Dim i As Long
+    
+    If IsArray(filter_values) Then
+        ReDim arr(LBound(filter_values) To UBound(filter_values)) As String
+        On Error GoTo Err:
+            For i = LBound(arr) To UBound(arr)
+                arr(i) = CStr(filter_values(i))
+            Next i
+        On Error GoTo 0
+        p_rowcol_manual_filter_values = arr
+    Else
+        On Error GoTo Err:
+            p_rowcol_manual_filter_values = CStr(filter_values)
+        On Error GoTo 0
+    End If
+    
+    set_rowcol_manual_filter_values = True
+    Exit Function
+    
+Err:
+    On Error GoTo 0
+    MsgBox "set_rowcol_manual_filter_values failed. Argument filter_values must be a string or an array of strings"
+    set_rowcol_manual_filter_values = False
     
 End Function
 

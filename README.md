@@ -39,7 +39,41 @@ The ``init`` method accepts a Range argument, which it uses as the SourceData fo
 
 ### Adding Pivot Fields
 
+Pivot fields can be added individually or collectively in an array. Adding pivot fields one by one offers more control over the field settings.
 
+```vba
+Dim ptf As PtWField
 
+' Create a "Region" PivotWrap row field, 
+' sort by "Revenue" in descending order, 
+' filter by top 12 items in "Revenue"
+Set ptf = pt.add_row_field( _
+	field_name:="Region", _
+	position:=1, _
+	sort_by:="Revenue", _
+	sort_order:=xlDescending, _
+	filter_type:=xlTopCount, _
+	filter_by_field_name:="Revenue", _
+	filter_value1="12")
 
+' Create a "Month" PivotWrap column field
+pt.add_column_field "Month", 1
+
+' Create a "Year" PivotWrap page field,
+' set current page to 2012, 2016, 2017
+pt.add_page_field "Year", 1, , Array("2012", "2016", "2017")
 
+' Create a "TotalRevenue" PivotWrap data field
+Set ptf = pt.add_data_field("TotalRevenue", "Revenue", 1, , xlSum)
+
+' Create an "AverageRevenue" PivotWrap data field
+pt.add_data_field "AvgRevenue", "Revenue", 2, , xlAverage
+```
+
+Creating multiple PtWFields with the same orientation is straightforward
+
+```vba
+Dim ptfs() As ptWField
+
+Set ptfs = pt.add_row_fields(array("Region", "Year"))
+```

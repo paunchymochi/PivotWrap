@@ -5,6 +5,9 @@
 ### Added
 
 - Installing and Using sections in README
+  - Initializing Class Module
+  - Adding Pivot Fields
+  - Creating Pivot Table
 
 ### Changed
 

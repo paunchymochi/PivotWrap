@@ -910,6 +910,10 @@ Public Function create(Optional destination_row As Long, _
     ptField_pages = apply_rowcolpage_pt_fields(pt, clsPtField_pages)
     ptField_datas = apply_data_pt_fields(pt, clsPtField_datas)
     
+    ' Set row/column sorting
+    apply_rowcol_sort clsPtField_rows, ptField_rows
+    apply_rowcol_sort clsPtField_columns, ptField_columns
+    
     ' Set row/column filters (i.e. top 10, label filter, value filter) in pivot table
     apply_rowcol_filter clsPtField_rows, ptField_rows
     apply_rowcol_filter clsPtField_columns, ptField_columns
@@ -977,6 +981,32 @@ Private Function update_pivot_table_dict(pt As PivotTable) As Boolean
     
     update_pivot_table_dict = True
     
+End Function
+
+
+Private Function apply_rowcol_sort(cls_pt_fields() As clsPtField, pt_fields() As PivotField) As Boolean
+    ' Applies row and column sorting
+    ' Called by create()
+    
+    Dim cls_pt_field As clsPtField
+    Dim pt_field As PivotField
+    Dim i As Long
+    
+    If UBound(cls_pt_fields) = -1 Then ' empty cls_pt_fields
+        apply_rowcol_sort = False
+        Exit Function
+    End If
+    
+    For i = LBound(cls_pt_fields) To UBound(cls_pt_fields)
+        Set cls_pt_field = cls_pt_fields(i)
+        If cls_pt_field.get_rowcol_sort_by_field_name <> vbNullString Then ' sort is specified
+            Set pt_field = pt_fields(i)
+            pt_field.AutoSort _
+                    Order:=cls_pt_field.get_rowcol_sort_order(), _
+                    field:=cls_pt_field.get_rowcol_sort_by_field_name()
+        End If
+    Next i
+
 End Function
         
 

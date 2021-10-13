@@ -28,7 +28,7 @@ Private p_data_number_format As String
 
 Private p_repeat_labels As XlPivotFieldRepeatLabels
 
-Private p_current_page As String
+Private p_current_page As Variant
 
 
 Sub init_row(field_name As String, _
@@ -243,13 +243,13 @@ Public Function set_rowcol_sort_by_field_name(Optional field_name As String) As 
         p_rowcol_sort_by = field_name
     End If
     
-    set_rowcol_sort_by = True
+    set_rowcol_sort_by_field_name = True
     
 End Function
 
 
-Public Function set_rowcol_sort(sort_order As XlSortOrder, Optional sort_by As String) As Boolean
-    set_rowcol_sort = set_rowcol_sort_by(sort_by) And set_rowcol_sort_order(sort_order)
+Public Function set_rowcol_sort(sort_order As XlSortOrder, Optional sort_by_field_name As String) As Boolean
+    set_rowcol_sort = set_rowcol_sort_by_field_name(sort_by_field_name) And set_rowcol_sort_order(sort_order)
 End Function
 
 
@@ -360,13 +360,34 @@ Public Function set_repeat_labels(repeat_labels As XlPivotFieldRepeatLabels) As 
 End Function
 
 
-Public Function get_current_page() As String
+Public Function get_current_page() As Variant
     get_current_page = p_current_page
 End Function
 
 
-Public Function set_current_page(current_page As String) As Boolean
-    p_current_page = current_page
+Public Function set_current_page(current_page As Variant) As Boolean
+    Dim pages() As String
+    Dim i As Long
+    
+    If IsArray(current_page) Then
+        ReDim pages(LBound(current_page) To UBound(current_page)) As String
+        For i = LBound(pages) To UBound(pages)
+            pages(i) = CStr(current_page(i))
+        Next i
+        p_current_page = pages
+    Else
+        On Error GoTo Err:
+        p_current_page = CStr(current_page)
+        On Error GoTo 0
+    End If
+        
     set_current_page = True
+    Exit Function
+    
+Err:
+    On Error GoTo 0
+    MsgBox "set_current_page failed. Argument current_page must be a string or array of strings."
+    set_current_page = False
+    
 End Function
 

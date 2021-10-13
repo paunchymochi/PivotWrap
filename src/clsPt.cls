@@ -176,17 +176,17 @@ Public Function print_all_fields() As String
 End Function
 
 
-Private Function print_dict(dict As Scripting.Dictionary, FIELD_ORIENTATION As String) As String
+Private Function print_dict(dict As Scripting.Dictionary, field_orientation As String) As String
     ' Print field information in Immediate window
     Dim key As Variant
     Dim s As String
     Dim s2 As String
     Dim field As clsPtField
     
-    s = vbNewLine & "=== " & FIELD_ORIENTATION & " Fields ===" & vbNewLine
+    s = vbNewLine & "=== " & field_orientation & " Fields ===" & vbNewLine
     
     For Each key In dict.keys
-        s2 = FIELD_ORIENTATION & " Field: " & key & vbNewLine
+        s2 = field_orientation & " Field: " & key & vbNewLine
         Set field = dict(key)
         s2 = s2 & vbTab & "Position: " & CStr(field.get_position()) & vbNewLine
         s = s & s2
@@ -493,23 +493,64 @@ Public Function add_row_fields(field_names As Variant, _
     ' Add multiple row fields by providing an array of field_names
     ' returns array of clsPtFields
     
+    add_row_fields = add_rowcol_fields(field_names, keys, positions, True)
+    
+End Function
+
+
+Public Function add_column_fields(field_names As Variant, _
+        Optional keys As Variant, _
+        Optional positions As Variant) As clsPtField()
+    ' Add multiple column fields by providing an array of field_names
+    ' Returns array of clsPtFields
+    
+    add_column_fields = add_rowcol_fields(field_names, keys, positions, False)
+    
+End Function
+
+
+Private Function add_rowcol_fields(ByRef field_names As Variant, _
+        ByRef keys As Variant, _
+        ByRef positions As Variant, _
+        is_row_field As Boolean) As clsPtField()
+    ' Calls add_row/column_field for each element in field_names
+    ' Returns an array of clsPtFields
+    ' Used in add_row_fields and add_column_fields
+    
     Dim i As Long
     Dim position_arr() As Long
     Dim key_arr() As String
-    Const FIELD_ORIENTATION = "Row Fields"
+    Dim field_orientation As String
+    Dim pt_fields() As clsPtField
     
-    ' Convert parameters to array
+    If is_row_field Then
+        field_orientation = "Row Fields"
+    Else
+        field_orientation = "Column Fields"
+    End If
+    
+    ' Convert arguments to arrays
     If Not IsArray(field_names) Then field_names = Array(field_names)
     If Not IsArray(keys) Then keys = Array(keys)
     If Not IsArray(positions) Then positions = Array(positions)
     
-    position_arr = get_position_array(field_names, positions, FIELD_ORIENTATION)
-    key_arr = get_key_array(field_names, keys, FIELD_ORIENTATION)
+    position_arr = get_position_array(field_names, positions, field_orientation)
+    key_arr = get_key_array(field_names, keys, field_orientation)
     
-    For i = LBound(field_names) To UBound(field_names)
-        add_row_field CStr(field_names(i)), position_arr(i), key_arr(i)
-    Next i
-
+    ReDim pt_fields(0 To UBound(field_names)) As clsPtField
+    
+    If is_row_field Then
+        For i = LBound(field_names) To UBound(field_names)
+            Set pt_fields(i) = add_row_field(CStr(field_names(i)), position_arr(i), key_arr(i))
+        Next i
+    Else
+        For i = LBound(field_names) To UBound(field_names)
+            Set pt_fields(i) = add_column_field(CStr(field_names(i)), position_arr(i), key_arr(i))
+        Next i
+    End If
+    
+    add_rowcol_fields = pt_fields
+    
 End Function
 
 

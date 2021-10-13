@@ -493,7 +493,7 @@ Public Function add_row_fields(field_names As Variant, _
     ' Add multiple row fields by providing an array of field_names
     ' returns array of clsPtFields
     
-    add_row_fields = add_rowcol_fields(field_names, keys, positions, True)
+    add_row_fields = add_rowcolpage_fields(field_names, keys, positions, xlRowField)
     
 End Function
 
@@ -504,52 +504,18 @@ Public Function add_column_fields(field_names As Variant, _
     ' Add multiple column fields by providing an array of field_names
     ' Returns array of clsPtFields
     
-    add_column_fields = add_rowcol_fields(field_names, keys, positions, False)
+    add_column_fields = add_rowcolpage_fields(field_names, keys, positions, xlColumnField)
     
 End Function
 
 
-Private Function add_rowcol_fields(ByRef field_names As Variant, _
-        ByRef keys As Variant, _
-        ByRef positions As Variant, _
-        is_row_field As Boolean) As clsPtField()
-    ' Calls add_row/column_field for each element in field_names
-    ' Returns an array of clsPtFields
-    ' Used in add_row_fields and add_column_fields
+Public Function add_page_fields(field_names As Variant, _
+        Optional keys As Variant, _
+        Optional positions As Variant) As clsPtField()
+    ' Add multiple column fields by providing an array of field_names
+    ' Returns array of clsPtFields
     
-    Dim i As Long
-    Dim position_arr() As Long
-    Dim key_arr() As String
-    Dim field_orientation As String
-    Dim pt_fields() As clsPtField
-    
-    If is_row_field Then
-        field_orientation = "Row Fields"
-    Else
-        field_orientation = "Column Fields"
-    End If
-    
-    ' Convert arguments to arrays
-    If Not IsArray(field_names) Then field_names = Array(field_names)
-    If Not IsArray(keys) Then keys = Array(keys)
-    If Not IsArray(positions) Then positions = Array(positions)
-    
-    position_arr = get_position_array(field_names, positions, field_orientation)
-    key_arr = get_key_array(field_names, keys, field_orientation)
-    
-    ReDim pt_fields(0 To UBound(field_names)) As clsPtField
-    
-    If is_row_field Then
-        For i = LBound(field_names) To UBound(field_names)
-            Set pt_fields(i) = add_row_field(CStr(field_names(i)), position_arr(i), key_arr(i))
-        Next i
-    Else
-        For i = LBound(field_names) To UBound(field_names)
-            Set pt_fields(i) = add_column_field(CStr(field_names(i)), position_arr(i), key_arr(i))
-        Next i
-    End If
-    
-    add_rowcol_fields = pt_fields
+    add_page_fields = add_rowcolpage_fields(field_names, keys, positions, xlPageField)
     
 End Function
 
@@ -772,6 +738,57 @@ Public Function remove_data_field(field_name As String, Optional is_key As Boole
     
     Set pt_field = pop_field(p_data_fields_dict, field_name, is_key)
     Set remove_data_field = pt_field
+    
+End Function
+
+
+Private Function add_rowcolpage_fields(ByRef field_names As Variant, _
+        ByRef keys As Variant, _
+        ByRef positions As Variant, _
+        orientation As XlPivotFieldOrientation) As clsPtField()
+    ' Calls add_row/column_field for each element in field_names
+    ' Returns an array of clsPtFields
+    ' Used in add_row_fields and add_column_fields
+    
+    Dim i As Long
+    Dim position_arr() As Long
+    Dim key_arr() As String
+    Dim field_orientation As String
+    Dim pt_fields() As clsPtField
+    
+    If orientation = xlRowField Then
+        field_orientation = "Row Fields"
+    ElseIf orientation = xlColumnField Then
+        field_orientation = "Column Fields"
+    ElseIf orientation = xlPageField Then
+        field_orientation = "Page Fields"
+    End If
+    
+    ' Convert arguments to arrays
+    If Not IsArray(field_names) Then field_names = Array(field_names)
+    If Not IsArray(keys) Then keys = Array(keys)
+    If Not IsArray(positions) Then positions = Array(positions)
+    
+    position_arr = get_position_array(field_names, positions, field_orientation)
+    key_arr = get_key_array(field_names, keys, field_orientation)
+    
+    ReDim pt_fields(0 To UBound(field_names)) As clsPtField
+    
+    If orientation = xlRowField Then
+        For i = LBound(field_names) To UBound(field_names)
+            Set pt_fields(i) = add_row_field(CStr(field_names(i)), position_arr(i), key_arr(i))
+        Next i
+    ElseIf orientation = xlColumnField Then
+        For i = LBound(field_names) To UBound(field_names)
+            Set pt_fields(i) = add_column_field(CStr(field_names(i)), position_arr(i), key_arr(i))
+        Next i
+    ElseIf orientation = xlPageField Then
+        For i = LBound(field_names) To UBound(field_names)
+            Set pt_fields(i) = add_page_field(CStr(field_names(i)), position_arr(i), key_arr(i))
+        Next i
+    End If
+    
+    add_rowcolpage_fields = pt_fields
     
 End Function
 
@@ -1091,7 +1108,7 @@ Private Function apply_datapivot_field(ByRef pt As PivotTable, _
     End If
 
     With pt.DataPivotField
-        .Orientation = o
+        .orientation = o
         .Position = p
     End With
     
@@ -1117,7 +1134,7 @@ Private Function apply_rowcolpage_pt_fields(ByRef pt As PivotTable, ByRef input_
     
     For i = LBound(input_fields) To UBound(input_fields)
         Set output_fields(i) = pt.PivotFields(input_fields(i).get_field_name())
-        output_fields(i).Orientation = input_fields(i).get_orientation()
+        output_fields(i).orientation = input_fields(i).get_orientation()
         output_fields(i).Position = i + 1
     Next i
     

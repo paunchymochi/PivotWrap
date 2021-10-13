@@ -176,17 +176,17 @@ Public Function print_all_fields() As String
 End Function
 
 
-Private Function print_dict(dict As Scripting.Dictionary, field_orientation As String) As String
+Private Function print_dict(dict As Scripting.Dictionary, FIELD_ORIENTATION As String) As String
     ' Print field information in Immediate window
     Dim key As Variant
     Dim s As String
     Dim s2 As String
     Dim field As clsPtField
     
-    s = vbNewLine & "=== " & field_orientation & " Fields ===" & vbNewLine
+    s = vbNewLine & "=== " & FIELD_ORIENTATION & " Fields ===" & vbNewLine
     
     For Each key In dict.keys
-        s2 = field_orientation & " Field: " & key & vbNewLine
+        s2 = FIELD_ORIENTATION & " Field: " & key & vbNewLine
         Set field = dict(key)
         s2 = s2 & vbTab & "Position: " & CStr(field.get_position()) & vbNewLine
         s = s & s2
@@ -310,6 +310,182 @@ Sub setup(Optional ByVal row_fields As Variant, _
 
 End Sub
 
+Private Function get_position_array(ByRef field_names As Variant, _
+        ByRef positions As Variant, _
+        ByRef field_orientation_name As String) As Long()
+    
+    ' Validates positions variable as a number or array of numbers
+    ' field_orientation_name argument is for error message only
+    ' Returns validated array of numbers, or empty array if not valid
+    ' Used in add_*_fields functions
+        
+    Dim position_array() As Long
+    Dim use_positions As Boolean
+    Dim err_msg As String
+    Dim i As Long
+    
+    err_msg = vbNullString
+    
+    ' Convert parameters to array
+    If Not IsArray(field_names) Then field_names = Array(field_names)
+    If Not IsArray(positions) Then positions = Array(positions)
+    
+    ' Make sure positions is not missing and has same number of elements as field_names
+    If Not IsMissing(positions(0)) Then
+        If UBound(positions) <> UBound(field_names) Then ' Array lengths do not match
+            err_msg = err_msg & field_orientation_name & _
+                    " : Length of positions array must be the same as the length of field_names array" & _
+                    vbNewLine
+            use_positions = False
+        Else
+            ' Make sure each position element is numeric
+            If is_array_numeric(positions) Then
+                use_positions = True ' positions array is valid
+            Else
+                err_msg = err_msg & field_orientation_name & _
+                        " : Each element in positions array must be numeric" & _
+                        vbNewLine
+            End If
+        End If
+    Else ' missing positions
+        use_positions = False
+    End If
+    
+    If Not err_msg = vbNullString Then ' positions validation failed, return empty array
+        ReDim position_array(-1 To -1) As Long
+        MsgBox err_msg
+        get_position_array = position_array
+        Exit Function
+    End If
+    
+    ReDim position_array(0 To UBound(field_names)) As Long
+    
+    ' Use positions array if use_position is True, otherwise use i
+    If use_positions Then ' valid positions
+        For i = 0 To UBound(position_array)
+            position_array(i) = positions(i)
+        Next i
+    Else ' missing positions
+        For i = 0 To UBound(position_array)
+            position_array(i) = i + 1
+        Next i
+    End If
+    
+    get_position_array = position_array
+    
+End Function
+
+
+Private Function is_array_numeric(ByRef arr As Variant) As Boolean
+    ' Checks if all elements in arr are numeric
+    
+    Dim i As Long
+    
+    For i = LBound(arr) To UBound(arr)
+        If Not IsNumeric(arr(i)) Then
+            is_array_numeric = False
+            Exit Function
+        End If
+    Next i
+    
+    is_array_numeric = True
+    
+End Function
+
+
+Private Function is_array_unique_strings(ByRef arr As Variant) As Boolean
+    ' Checks if all elements in arr are unique
+    ' Comparisons are case-insensitive
+    
+    Dim i As Long
+    Dim j As Long
+    Dim str_i As String
+    Dim str_j As String
+    
+    For i = LBound(arr) To UBound(arr) - 1
+        str_i = LCase(CStr(arr(i)))
+        For j = i + 1 To UBound(arr)
+            str_j = LCase(CStr(arr(j)))
+            If str_i = str_j Then
+                is_array_unique_strings = False
+                Exit Function
+            End If
+        Next j
+    Next i
+    
+    is_array_unique_strings = True
+    
+End Function
+
+
+Private Function get_key_array(ByRef field_names As Variant, _
+        ByRef keys As Variant, _
+        ByRef field_orientation_name As String) As String()
+    
+    ' Validates keys variable as a string or array of strings
+    ' each element in keys must be unique
+    ' field_orientation_name argument is for error message only
+    ' Returns validated array of strings, or empty array if not valid
+    ' Used in add_*_fields functions
+    
+    Dim key_array() As String
+    Dim use_keys As Boolean
+    Dim err_msg As String
+    Dim i As Long
+    Dim j As Long
+    
+    err_msg = vbNullString
+    
+    ' Convert parameters to array
+    If Not IsArray(field_names) Then field_names = Array(field_names)
+    If Not IsArray(keys) Then keys = Array(keys)
+    
+    ' Make sure keys is not missing and has same number of elements as field_names
+    If Not IsMissing(keys(0)) Then
+        If UBound(keys) <> UBound(field_names) Then ' Array lengths do not match
+            err_msg = err_msg & field_orientation_name & _
+                    " : Length of keys array must be the same as the length of field_names array" & _
+                    vbNewLine
+            use_keys = False
+        Else
+            ' Make sure each key is unique
+            If is_array_unique_strings(keys) Then
+                use_keys = True ' keys array is valid
+            Else
+                err_msg = err_msg & field_orientation_name & _
+                        " : Each key element in keys array must be unique" & _
+                        vbNewLine
+                use_keys = False
+            End If
+        End If
+    Else ' missing keys
+        use_keys = False
+    End If
+    
+    If Not err_msg = vbNullString Then ' keys validation failed, return empty array
+        ReDim key_array(-1 To -1) As String
+        MsgBox err_msg
+        get_key_array = key_array
+        Exit Function
+    End If
+    
+    ReDim key_array(0 To UBound(field_names)) As String
+    
+    ' Use keys array is use_key is True, other use field_names
+    If use_keys Then ' valid keys
+        For i = 0 To UBound(key_array)
+            key_array(i) = keys(i)
+        Next i
+    Else ' missing keys
+        For i = 0 To UBound(key_array)
+            key_array(i) = field_names(i)
+        Next i
+    End If
+    
+    get_key_array = key_array
+    
+End Function
+
 
 Public Function add_row_fields(field_names As Variant, _
         Optional keys As Variant, _
@@ -320,70 +496,19 @@ Public Function add_row_fields(field_names As Variant, _
     Dim i As Long
     Dim position_arr() As Long
     Dim key_arr() As String
-    Dim use_keys As Boolean
-    Dim use_positions As Boolean
+    Const FIELD_ORIENTATION = "Row Fields"
     
     ' Convert parameters to array
     If Not IsArray(field_names) Then field_names = Array(field_names)
     If Not IsArray(keys) Then keys = Array(keys)
     If Not IsArray(positions) Then positions = Array(positions)
     
-    ' Make sure lengths of keys and positions (if not empty) match length of field_names
-    If Not IsMissing(keys(0)) Then
-        If UBound(keys) <> UBound(field_names) Then
-            MsgBox "Length of keys must be the same as length of field_names"
-            Exit Function
-        Else
-            use_keys = True
-        End If
-    Else
-        use_keys = False
-    End If
-    
-    If Not IsMissing(positions(0)) Then
-        If UBound(positions) <> UBound(field_names) Then
-            MsgBox "Length of positions must be the same as length of field_names"
-            Exit Function
-        Else
-            ' Make sure positions are numeric
-            For i = LBound(positions) To UBound(positions)
-                If Not IsNumeric(positions(i)) Then
-                    MsgBox "Positions argument must numeric or an array of numbers"
-                    Exit Function
-                End If
-            Next i
-            use_positions = True
-        End If
-    Else
-        use_positions = False
-    End If
-    
-    ReDim key_arr(LBound(field_names) To UBound(field_names)) As String
-    ReDim position_arr(LBound(field_names) To UBound(field_names)) As Long
-    
-    ' populate position_arr and key_arr
-    For i = LBound(field_names) To UBound(field_names)
-        
-        ' use provided keys if valid, otherwise use field_name as keys
-        If use_keys Then
-            key_arr(i) = keys(i)
-        Else
-            key_arr(i) = field_names(i)
-        End If
-        
-        ' use provided positions if valid, otherwise use i as position
-        If use_positions Then
-            position_arr(i) = positions(i)
-        Else
-            position_arr(i) = i + 1
-        End If
-    Next i
-        
+    position_arr = get_position_array(field_names, positions, FIELD_ORIENTATION)
+    key_arr = get_key_array(field_names, keys, FIELD_ORIENTATION)
     
     For i = LBound(field_names) To UBound(field_names)
         add_row_field CStr(field_names(i)), position_arr(i), key_arr(i)
     Next i
-
 
 End Function
 

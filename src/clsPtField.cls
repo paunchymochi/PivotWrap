@@ -10,7 +10,7 @@ Attribute VB_Exposed = False
 Option Explicit
 
 Private p_field_name As String
-Private p_field_name_original As String
+Private p_source_field_name As String
 Private p_orientation As XlPivotFieldOrientation
 Private p_position As Long
 
@@ -66,14 +66,14 @@ End Sub
 
 
 Sub init_data(field_name As String, _
-        field_name_original As String, _
+        source_field_name As String, _
         Position As Long, _
         Optional data_function As XlConsolidationFunction, _
         Optional data_calculation As XlPivotFieldCalculation, _
         Optional data_number_format As String)
     ' Initialize Data Field
     
-    init field_name, field_name_original, xlDataField, Position
+    init field_name, source_field_name, xlDataField, Position
     
     If data_function = 0 Then
         p_data_function = xlSum
@@ -142,13 +142,13 @@ End Sub
 
 
 Private Sub init(field_name As String, _
-        field_name_original As String, _
+        source_field_name As String, _
         Orientation As XlPivotFieldOrientation, _
         Position As Long)
     ' Shared code for initializing all 4 field orientations
     
     p_field_name = field_name
-    p_field_name_original = field_name_original
+    p_source_field_name = source_field_name
     p_orientation = Orientation
     p_position = Position
     
@@ -164,8 +164,8 @@ Function get_field_name() As String
 End Function
 
 
-Function get_field_name_original() As String
-    get_field_name_original = p_field_name_original
+Function get_source_field_name() As String
+    get_source_field_name = p_source_field_name
 End Function
 
 

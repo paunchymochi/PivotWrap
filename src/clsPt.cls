@@ -467,7 +467,7 @@ End Function
 
 
 Public Function add_data_field(field_name As String, _
-        field_name_original As String, _
+        source_field_name As String, _
         Position As Long, _
         Optional key As String, _
         Optional data_function As XlConsolidationFunction, _
@@ -476,8 +476,8 @@ Public Function add_data_field(field_name As String, _
     ' Add new data field and store it in p_data_fields_dict
     ' Return the new data field
     
-    If field_name_exists(field_name_original) = False Then
-        Debug.Print ("[" & field_name_original & "] is not a found in the source data")
+    If field_name_exists(source_field_name) = False Then
+        Debug.Print ("[" & source_field_name & "] is not a found in the source data")
         Exit Function
     End If
     
@@ -485,7 +485,7 @@ Public Function add_data_field(field_name As String, _
     Set ptfield = New clsPtField
     
     ptfield.init_data field_name, _
-            field_name_original, _
+            source_field_name, _
             Position, _
             data_function, _
             data_calculation, _
@@ -562,25 +562,6 @@ Public Function set_null_display(display_empty As Boolean, Optional null_string 
     p_pt_display_null_string = display_empty
     p_pt_null_string = null_string
     set_null_display = True
-End Function
-
-
-Private Function field_name_exists(field_name As String) As Boolean
-    ' Check if field_name exists in the column headers of the source data
-    Dim names As Variant
-    Dim name As Variant
-    
-    names = get_column_names()
-    
-    For Each name In names
-        If field_name = name Then
-            field_name_exists = True
-            Exit Function
-        End If
-    Next name
-    
-    field_name_exists = False
-
 End Function
 
 
@@ -999,7 +980,7 @@ Private Function apply_data_pt_fields(ByRef pt As PivotTable, ByRef input_fields
     
     For i = LBound(input_fields) To UBound(input_fields)
         Set output_fields(i) = pt.AddDataField( _
-                pt.PivotFields(input_fields(i).get_field_name_original()), _
+                pt.PivotFields(input_fields(i).get_source_field_name()), _
                 input_fields(i).get_field_name(), _
                 input_fields(i).get_data_function)
         output_fields(i).NumberFormat = input_fields(i).get_data_number_format()
@@ -1080,7 +1061,33 @@ Private Sub sort_input_fields(ByRef input_fields() As clsPtField)
 End Sub
 
 
-Function validate_data_field_names() As Boolean
+Private Function field_name_exists(field_name As String) As Boolean
+    ' Check if field_name exists in the column headers of the source data
+    Dim names As Variant
+    Dim name As Variant
+    
+    names = get_column_names()
+    
+    For Each name In names
+        If field_name = name Then
+            field_name_exists = True
+            Exit Function
+        End If
+    Next name
+    
+    field_name_exists = False
+
+End Function
+
+Function validate_field_name(field_name As String, _
+        source_field_name As String, _
+        key As String, _
+        d As Scripting.Dictionary) As Boolean
+    ' Checks if field_name is unique in d, if source_field_name is in source data headers, and
+    ' if key exists in d
+    
+    
+    
     Debug.Assert False
 End Function
 

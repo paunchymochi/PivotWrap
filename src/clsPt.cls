@@ -381,7 +381,7 @@ Public Function add_row_fields(field_names As Variant, _
         
     
     For i = LBound(field_names) To UBound(field_names)
-        add_row_field CStr(field_names(i)), CLng(positions(i))
+        add_row_field CStr(field_names(i)), position_arr(i), key_arr(i)
     Next i
 
 
@@ -400,8 +400,11 @@ Public Function add_row_field(field_name As String, _
     ' Add new row field and store it in p_row_fields_dict
     ' Return the new row field
     
-    If field_name_exists(field_name) = False Then
-        Debug.Print ("[" & field_name & "] is not a found in the source data")
+    If key = vbNullString Then
+        key = field_name
+    End If
+        
+    If Not validate_field_name_inputs(field_name, field_name, key, p_row_fields_dict) Then
         Exit Function
     End If
     
@@ -417,10 +420,7 @@ Public Function add_row_field(field_name As String, _
             filter_value1, _
             filter_value2
     
-    If key = vbNullString Then
-        key = field_name
-    End If
-    
+
     p_row_fields_dict.Add key, ptfield
     Set add_row_field = ptfield
     
@@ -438,9 +438,12 @@ Public Function add_column_field(field_name As String, _
         Optional filter_value2 As String) As clsPtField
     ' Add new column field and store it in p_row_fields_dict
     ' Return the new column field
-        
-    If field_name_exists(field_name) = False Then
-        Debug.Print ("[" & field_name & "] is not a found in the source data")
+    
+    If key = vbNullString Then
+        key = field_name
+    End If
+    
+    If Not validate_field_name_inputs(field_name, field_name, key, p_column_fields_dict) Then
         Exit Function
     End If
     
@@ -455,10 +458,6 @@ Public Function add_column_field(field_name As String, _
             filter_by_field_name, _
             filter_value1, _
             filter_value2
-    
-    If key = vbNullString Then
-        key = field_name
-    End If
     
     p_column_fields_dict.Add key, ptfield
     Set add_column_field = ptfield
@@ -475,9 +474,12 @@ Public Function add_data_field(field_name As String, _
         Optional data_number_format As String) As clsPtField
     ' Add new data field and store it in p_data_fields_dict
     ' Return the new data field
+
+    If key = vbNullString Then
+        key = field_name
+    End If
     
-    If field_name_exists(source_field_name) = False Then
-        Debug.Print ("[" & source_field_name & "] is not a found in the source data")
+    If Not validate_field_name_inputs(field_name, source_field_name, key, p_data_fields_dict) Then
         Exit Function
     End If
     
@@ -490,10 +492,6 @@ Public Function add_data_field(field_name As String, _
             data_function, _
             data_calculation, _
             data_number_format
-    
-    If key = vbNullString Then
-        key = field_name
-    End If
     
     p_data_fields_dict.Add key, ptfield
     Set add_data_field = ptfield
@@ -508,8 +506,11 @@ Public Function add_page_field(field_name As String, _
     ' Add new page field and store it in p_page_fields_dict
     ' Return the new page field
     
-    If field_name_exists(field_name) = False Then
-        Debug.Print ("[" & field_name & "] is not a found in the source data")
+    If key = vbNullString Then
+        key = field_name
+    End If
+    
+    If Not validate_field_name_inputs(field_name, field_name, key, p_page_fields_dict) Then
         Exit Function
     End If
     
@@ -519,10 +520,6 @@ Public Function add_page_field(field_name As String, _
     ptfield.init_page field_name, _
             Position, _
             current_page
-    
-    If key = vbNullString Then
-        key = field_name
-    End If
     
     p_page_fields_dict.Add key, ptfield
     Set add_page_field = ptfield
@@ -1079,16 +1076,100 @@ Private Function field_name_exists(field_name As String) As Boolean
 
 End Function
 
-Function validate_field_name(field_name As String, _
+
+Private Function validate_field_name_inputs(field_name As String, _
         source_field_name As String, _
         key As String, _
-        d As Scripting.Dictionary) As Boolean
+        dict As Scripting.Dictionary) As Boolean
     ' Checks if field_name is unique in d, if source_field_name is in source data headers, and
     ' if key exists in d
+    ' Return True if validations pass, False otherwise
     
+    Dim err_msg As String
     
+    err_msg = err_msg & val_source_field_name_is_in_data(source_field_name)
+    err_msg = err_msg & val_field_name_is_not_duplicate(field_name, dict)
+    err_msg = err_msg & val_key_is_not_duplicate(key, dict)
     
-    Debug.Assert False
+    If err_msg = vbNullString Then
+        validate_field_name_inputs = True
+    Else
+        MsgBox err_msg
+        validate_field_name_inputs = False
+    End If
+    
+End Function
+
+
+Private Function val_source_field_name_is_in_data(source_field_name As String) As String
+    Dim names As Variant
+    Dim name As Variant
+    Dim err_msg As String
+    Dim found As Boolean
+    ' Check if source_field_name is in source data headers
+    ' Return error message if source_field_name is not found in headers
+    ' Return vbnullstring otherwise
+    ' Used in validate_field_name_inputs
+    
+    ' Get headers in source data
+    names = get_column_names()
+    
+    found = False
+    For Each name In names
+        If source_field_name = name Then
+            found = True
+            Exit For
+        End If
+    Next name
+    If Not found Then
+        err_msg = "source_field_name [" & source_field_name & "] does not exist in source data. " & vbNewLine
+    Else
+        err_msg = vbNullString
+    End If
+    
+    val_source_field_name_is_in_data = err_msg
+
+End Function
+
+
+Private Function val_field_name_is_not_duplicate(field_name As String, dict As Scripting.Dictionary) As String
+    ' Return error message if field_name is already in dictionary
+    ' Return vbnullstring otherwise
+    ' Used in validate_field_name_inputs
+    
+    Dim i As Long
+    Dim pt_field As clsPtField
+    
+    For i = 0 To dict.Count - 1
+        Set pt_field = dict.Items(i)
+        If pt_field.get_field_name() = field_name Then
+            val_field_name_is_not_duplicate = "field_name [" & field_name & "] is already used" & vbNewLine
+            Exit Function
+        End If
+    Next i
+    
+    val_field_name_is_not_duplicate = vbNullString
+    
+End Function
+
+
+Private Function val_key_is_not_duplicate(key As String, dict As Scripting.Dictionary) As String
+    ' Return error message if key is already in dictionary
+    ' Return vbnullstring otherwise
+    ' Used in validate_field_name_inputs
+    
+    If key = vbNullString Then
+        val_key_is_not_duplicate = "key cannot be empty string" & vbNewLine
+        Exit Function
+    End If
+    
+    If dict.Exists(key) Then
+        val_key_is_not_duplicate = "key [" & key & "] is already used" & vbNewLine
+        Exit Function
+    End If
+    
+    val_key_is_not_duplicate = vbNullString
+    
 End Function
 
 

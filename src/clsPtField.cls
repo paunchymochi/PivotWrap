@@ -36,12 +36,12 @@ Private p_current_page As Variant
 Sub init_row(field_name As String, _
         position As Long, _
         Optional sort_by As String, _
-        Optional sort_order As XlSortOrder, _
+        Optional sort_order As XlSortOrder = xlAscending, _
         Optional filter_type As XlPivotFilterType, _
         Optional filter_by_field_name As String, _
         Optional filter_value1 As String, _
         Optional filter_value2 As String, _
-        Optional manual_filter_values As Variant)
+        Optional manual_filter_values As Variant = "")
     ' Initialize Row Field
         
     init_rowcol field_name, xlRowField, position, _
@@ -54,12 +54,12 @@ End Sub
 Sub init_col(field_name As String, _
         position As Long, _
         Optional sort_by As String, _
-        Optional sort_order As XlSortOrder, _
+        Optional sort_order As XlSortOrder = xlAscending, _
         Optional filter_type As XlPivotFilterType, _
         Optional filter_by_field_name As String, _
         Optional filter_value1 As String, _
         Optional filter_value2 As String, _
-        Optional manual_filter_values As Variant)
+        Optional manual_filter_values As Variant = "")
     ' Initialize Column Field
     
     init_rowcol field_name, xlColumnField, position, _
@@ -72,37 +72,23 @@ End Sub
 Sub init_data(field_name As String, _
         source_field_name As String, _
         position As Long, _
-        Optional data_function As XlConsolidationFunction, _
-        Optional data_calculation As XlPivotFieldCalculation, _
-        Optional data_number_format As String)
+        Optional data_function As XlConsolidationFunction = xlSum, _
+        Optional data_calculation As XlPivotFieldCalculation = xlNoAdditionalCalculation, _
+        Optional data_number_format As String = "General")
     ' Initialize Data Field
     
     init field_name, source_field_name, xlDataField, position
     
-    If data_function = 0 Then
-        set_data_function xlSum
-    Else
-        set_data_function data_function
-    End If
-    
-    If data_calculation = 0 Then
-        set_data_calculation xlNoAdditionalCalculation
-    Else
-        set_data_calculation data_calculation
-    End If
-    
-    If data_number_format = "" Then
-        set_data_number_format "General"
-    Else
-        set_data_number_format data_number_format
-    End If
+    set_data_function data_function
+    set_data_calculation data_calculation
+    set_data_number_format data_number_format
 
 End Sub
 
 
 Sub init_page(field_name As String, _
         position As Long, _
-        Optional current_page As Variant)
+        Optional current_page As Variant = "(All)")
     ' Initialize Page Field
     
     init field_name, field_name, xlPageField, position
@@ -120,23 +106,18 @@ Private Sub init_rowcol(field_name As String, _
         orientation As XlPivotFieldOrientation, _
         position As Long, _
         Optional sort_by As String, _
-        Optional sort_order As XlSortOrder, _
+        Optional sort_order As XlSortOrder = xlAscending, _
         Optional filter_type As XlPivotFilterType, _
         Optional filter_by_field_name As String, _
         Optional filter_value1 As String, _
         Optional filter_value2 As String, _
-        Optional manual_filter_values As Variant)
+        Optional manual_filter_values As Variant = "")
     ' Shared code for initializing Row and Column Fields
         
     init field_name, field_name, orientation, position
     
     set_rowcol_sort_by_field_name sort_by
-    
-    If sort_order = 0 Then
-        set_rowcol_sort_order xlAscending
-    Else
-        set_rowcol_sort_order sort_order
-    End If
+    set_rowcol_sort_order sort_order
     
     set_rowcol_filter_type filter_type
     set_rowcol_filter_by_field_name filter_by_field_name

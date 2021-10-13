@@ -58,7 +58,7 @@ Set ptf = pt.add_row_field( _
 
 ' Create a "Month" PivotWrap column field
 pt.add_column_field "Month", 1
-
+
 ' Create a "Year" PivotWrap page field,
 ' set current page to 2012, 2016, 2017
 pt.add_page_field "Year", 1, , Array("2012", "2016", "2017")
@@ -76,4 +76,22 @@ Creating multiple PtWFields with the same orientation is straightforward
 Dim ptfs() As ptWField
 
 Set ptfs = pt.add_row_fields(array("Region", "Year"))
+
+pt.add_column_fields array("Month", "Weekday")
+```
+
+### Creating Pivot Table
+
+Once `pt` has been populated with pivot fields, call `pt.create` to create a pivot table. `pt.create` has several optional parameters to choose output range and override output fields. 
+
+```vba
+' Creates a pivot table at Range("C10") of Worksheet "Output" in ActiveWorkbook
+pt.create destination_row:=10, destination_column:=3, _
+	table_name:="MyPivotTable", _
+	destination_worksheet_name:="Output", _
+	destination_workbook:=ActiveWorkbook
+
+
+' Default behaviour: Creates a pivot table at Range("C3") of Worksheet "PivotTable" in ActiveWorkbook
+pt.create
 ```

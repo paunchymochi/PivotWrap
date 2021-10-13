@@ -334,7 +334,7 @@ Private Function get_position_array(ByRef field_names As Variant, _
     If Not IsMissing(positions(0)) Then
         If UBound(positions) <> UBound(field_names) Then ' Array lengths do not match
             err_msg = err_msg & field_orientation_name & _
-                    " : Length of positions array must be the same as the length of field_names array" & _
+                    " : positions array must have the same length as field_names array" & _
                     vbNewLine
             use_positions = False
         Else
@@ -444,7 +444,7 @@ Private Function get_key_array(ByRef field_names As Variant, _
     If Not IsMissing(keys(0)) Then
         If UBound(keys) <> UBound(field_names) Then ' Array lengths do not match
             err_msg = err_msg & field_orientation_name & _
-                    " : Length of keys array must be the same as the length of field_names array" & _
+                    " : keys array must have the same length as field_names array" & _
                     vbNewLine
             use_keys = False
         Else
@@ -521,7 +521,7 @@ End Function
 
 
 Public Function add_row_field(field_name As String, _
-        Position As Long, _
+        position As Long, _
         Optional key As String, _
         Optional sort_by As String, _
         Optional sort_order As XlSortOrder, _
@@ -544,7 +544,7 @@ Public Function add_row_field(field_name As String, _
     Set ptfield = New clsPtField
     
     ptfield.init_row field_name, _
-            Position, _
+            position, _
             sort_by, _
             sort_order, _
             filter_type, _
@@ -560,7 +560,7 @@ End Function
 
 
 Public Function add_column_field(field_name As String, _
-        Position As Long, _
+        position As Long, _
         Optional key As String, _
         Optional sort_by As String, _
         Optional sort_order As XlSortOrder, _
@@ -583,7 +583,7 @@ Public Function add_column_field(field_name As String, _
     Set ptfield = New clsPtField
     
     ptfield.init_col field_name, _
-            Position, _
+            position, _
             sort_by, _
             sort_order, _
             filter_type, _
@@ -599,7 +599,7 @@ End Function
 
 Public Function add_data_field(field_name As String, _
         source_field_name As String, _
-        Position As Long, _
+        position As Long, _
         Optional key As String, _
         Optional data_function As XlConsolidationFunction, _
         Optional data_calculation As XlPivotFieldCalculation, _
@@ -620,7 +620,7 @@ Public Function add_data_field(field_name As String, _
     
     ptfield.init_data field_name, _
             source_field_name, _
-            Position, _
+            position, _
             data_function, _
             data_calculation, _
             data_number_format
@@ -632,7 +632,7 @@ End Function
 
 
 Public Function add_page_field(field_name As String, _
-        Position As Long, _
+        position As Long, _
         Optional key As String, _
         Optional current_page As String) As clsPtField
     ' Add new page field and store it in p_page_fields_dict
@@ -650,7 +650,7 @@ Public Function add_page_field(field_name As String, _
     Set ptfield = New clsPtField
     
     ptfield.init_page field_name, _
-            Position, _
+            position, _
             current_page
     
     p_page_fields_dict.Add key, ptfield
@@ -757,11 +757,11 @@ Private Function add_rowcolpage_fields(ByRef field_names As Variant, _
     Dim pt_fields() As clsPtField
     
     If orientation = xlRowField Then
-        field_orientation = "Row Fields"
+        field_orientation = "add_row_fields"
     ElseIf orientation = xlColumnField Then
-        field_orientation = "Column Fields"
+        field_orientation = "add_column_fields"
     ElseIf orientation = xlPageField Then
-        field_orientation = "Page Fields"
+        field_orientation = "add_page_fields"
     End If
     
     ' Convert arguments to arrays
@@ -771,6 +771,10 @@ Private Function add_rowcolpage_fields(ByRef field_names As Variant, _
     
     position_arr = get_position_array(field_names, positions, field_orientation)
     key_arr = get_key_array(field_names, keys, field_orientation)
+    
+    If UBound(position_arr) = -1 Or UBound(key_arr) = -1 Then ' Invalid arguments provided; abort
+        End
+    End If
     
     ReDim pt_fields(0 To UBound(field_names)) As clsPtField
     
@@ -1118,7 +1122,7 @@ Private Function apply_datapivot_field(ByRef pt As PivotTable, _
 
     With pt.DataPivotField
         .orientation = o
-        .Position = p
+        .position = p
     End With
     
     apply_datapivot_field = True
@@ -1144,7 +1148,7 @@ Private Function apply_rowcolpage_pt_fields(ByRef pt As PivotTable, ByRef input_
     For i = LBound(input_fields) To UBound(input_fields)
         Set output_fields(i) = pt.PivotFields(input_fields(i).get_field_name())
         output_fields(i).orientation = input_fields(i).get_orientation()
-        output_fields(i).Position = i + 1
+        output_fields(i).position = i + 1
     Next i
     
     apply_rowcolpage_pt_fields = output_fields
@@ -1293,11 +1297,12 @@ Private Function validate_field_name_inputs(field_name As String, _
 End Function
 
 
-Private Function val_source_field_name_is_in_data(source_field_name As String) As String
+Private Function val_source_field_name_is_in_data(ByRef source_field_name As String) As String
     Dim names As Variant
     Dim name As Variant
     Dim err_msg As String
     Dim found As Boolean
+    Dim source_field_name_lcase As String
     ' Check if source_field_name is in source data headers
     ' Return error message if source_field_name is not found in headers
     ' Return vbnullstring otherwise
@@ -1306,9 +1311,11 @@ Private Function val_source_field_name_is_in_data(source_field_name As String) A
     ' Get headers in source data
     names = get_column_names()
     
+    source_field_name_lcase = LCase(source_field_name)
+    
     found = False
     For Each name In names
-        If source_field_name = name Then
+        If source_field_name_lcase = LCase(name) Then
             found = True
             Exit For
         End If

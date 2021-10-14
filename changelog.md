@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Pivot Table Title
+
 ## [0.1.1] - 2021-10-14
 
 ### Added

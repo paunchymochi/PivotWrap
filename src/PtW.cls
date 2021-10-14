@@ -31,6 +31,8 @@ Private p_pt_null_string As String
 Private p_pt_display_error_string As Boolean
 Private p_pt_display_null_string As Boolean
 
+Private p_title As String
+
 ' === Public Property Accessors for Dictionaries ===
 Public Property Get row_fields() As Scripting.Dictionary
     Set row_fields = p_row_fields_dict
@@ -664,6 +666,15 @@ Public Function add_page_field(field_name As String, _
 End Function
 
 
+Public Function set_title(title As String) As Boolean
+    ' Set title of pivot table
+    
+    p_title = title
+    set_title = True
+    
+End Function
+
+
 Public Function set_datapivot_field(data_orientation As XlPivotFieldOrientation, _
         Optional data_position As Long) As Boolean
     ' Set data pivot field orientation & position (i.e. the "Sigma Values" field in PivotTable Fields)
@@ -857,6 +868,7 @@ End Function
 Public Function create(Optional destination_row As Long, _
         Optional destination_column As Long, _
         Optional table_name As String, _
+        Optional title As String, _
         Optional destination_worksheet_name As String, _
         Optional destination_workbook As Workbook, _
         Optional row_keys As Variant, _
@@ -881,6 +893,9 @@ Public Function create(Optional destination_row As Long, _
     Dim PtField_columns() As PivotField
     Dim PtField_datas() As PivotField
     Dim PtField_pages() As PivotField
+    
+    ' Set Title
+    set_title title
     
     ' Set workbook and worksheet
     Set destination_workbook = get_workbook(destination_workbook)
@@ -935,6 +950,9 @@ Public Function create(Optional destination_row As Long, _
     
     ' Set data pivot field (i.e. Sigma Value in Field List)
     apply_datapivot_field pt, PtField_rows, PtField_columns, PtField_datas
+    
+    ' Apply title
+    apply_title destination_range
     
     ' Add pivot table to dictionary
     update_pivot_table_dict pt
@@ -1309,6 +1327,24 @@ Private Function apply_data_pt_fields(ByRef pt As PivotTable, ByRef input_fields
 End Function
 
 
+Private Function apply_title(ByRef destination_range As Range) As Boolean
+    ' Puts title at topleft cell of destination range
+    ' Called by create()
+    
+    If p_title = vbNullString Then ' No Title to add
+        apply_title = False
+        Exit Function
+    End If
+    
+    With destination_range.Resize(1, 1)
+        .Value = p_title
+        .Font.Bold = True
+        .Font.Underline = True
+    End With
+    
+End Function
+
+
 Private Function populate_input_fields(dict As Scripting.Dictionary, Optional keys As Variant, Optional dict_name As String) As PtWField()
     ' Collects PtWFields from provided dict
     ' Uses all elements in dict if keys is not provided, other select only items with corresponding keys
@@ -1591,7 +1627,7 @@ End Function
 
 
 Private Function create_pivot_table(pivot_cache As PivotCache, _
-        destination_range As Range, _
+        ByVal destination_range As Range, _
         Optional destination_ws_name As String, _
         Optional destination_wb As Workbook, _
         Optional table_name As String) As PivotTable
@@ -1611,6 +1647,14 @@ Private Function create_pivot_table(pivot_cache As PivotCache, _
     End If
     
     Set destination_range = get_destination_range(destination_range, destination_ws_name, destination_wb)
+    
+    ' If title is present, move destination_range down 2 rows
+    If Not p_title = vbNullString Then
+        Set destination_range = destination_range.Offset(2)
+    End If
+    
+    ' move destination_range down count(page fields) + 1
+    Set destination_range = destination_range.Offset(p_page_fields_dict.Count + 1)
     
     destination_r1c1 = range_to_r1c1(destination_range)
     

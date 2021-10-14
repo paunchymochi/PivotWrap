@@ -2,7 +2,7 @@ VERSION 1.0 CLASS
 BEGIN
   MultiUse = -1  'True
 END
-Attribute VB_Name = "clsPt"
+Attribute VB_Name = "ptw"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
@@ -181,7 +181,7 @@ Private Function print_dict(dict As Scripting.Dictionary, field_orientation As S
     Dim key As Variant
     Dim s As String
     Dim s2 As String
-    Dim field As clsPtField
+    Dim field As PtWField
     
     s = vbNewLine & "=== " & field_orientation & " Fields ===" & vbNewLine
     
@@ -490,9 +490,9 @@ End Function
 
 Public Function add_row_fields(field_names As Variant, _
         Optional keys As Variant, _
-        Optional positions As Variant) As clsPtField()
+        Optional positions As Variant) As PtWField()
     ' Add multiple row fields by providing an array of field_names
-    ' returns array of clsPtFields
+    ' returns array of PtWFields
     
     add_row_fields = add_rowcolpage_fields(field_names, keys, positions, xlRowField)
     
@@ -501,9 +501,9 @@ End Function
 
 Public Function add_column_fields(field_names As Variant, _
         Optional keys As Variant, _
-        Optional positions As Variant) As clsPtField()
+        Optional positions As Variant) As PtWField()
     ' Add multiple column fields by providing an array of field_names
-    ' Returns array of clsPtFields
+    ' Returns array of PtWFields
     
     add_column_fields = add_rowcolpage_fields(field_names, keys, positions, xlColumnField)
     
@@ -512,9 +512,9 @@ End Function
 
 Public Function add_page_fields(field_names As Variant, _
         Optional keys As Variant, _
-        Optional positions As Variant) As clsPtField()
+        Optional positions As Variant) As PtWField()
     ' Add multiple column fields by providing an array of field_names
-    ' Returns array of clsPtFields
+    ' Returns array of PtWFields
     
     add_page_fields = add_rowcolpage_fields(field_names, keys, positions, xlPageField)
     
@@ -530,7 +530,7 @@ Public Function add_row_field(field_name As String, _
         Optional filter_by_field_name As String, _
         Optional filter_value1 As String, _
         Optional filter_value2 As String, _
-        Optional manual_filter_values As Variant) As clsPtField
+        Optional manual_filter_values As Variant) As PtWField
     ' Add new row field and store it in p_row_fields_dict
     ' Return the new row field
     
@@ -542,8 +542,8 @@ Public Function add_row_field(field_name As String, _
         Exit Function
     End If
     
-    Dim ptfield As clsPtField
-    Set ptfield = New clsPtField
+    Dim ptfield As PtWField
+    Set ptfield = New PtWField
     
     ptfield.init_row field_name, _
             position, _
@@ -571,7 +571,7 @@ Public Function add_column_field(field_name As String, _
         Optional filter_by_field_name As String, _
         Optional filter_value1 As String, _
         Optional filter_value2 As String, _
-        Optional manual_filter_values As Variant) As clsPtField
+        Optional manual_filter_values As Variant) As PtWField
     ' Add new column field and store it in p_row_fields_dict
     ' Return the new column field
     
@@ -583,8 +583,8 @@ Public Function add_column_field(field_name As String, _
         Exit Function
     End If
     
-    Dim ptfield As clsPtField
-    Set ptfield = New clsPtField
+    Dim ptfield As PtWField
+    Set ptfield = New PtWField
     
     ptfield.init_col field_name, _
             position, _
@@ -608,7 +608,7 @@ Public Function add_data_field(field_name As String, _
         Optional key As String, _
         Optional data_function As XlConsolidationFunction, _
         Optional data_calculation As XlPivotFieldCalculation, _
-        Optional data_number_format As String) As clsPtField
+        Optional data_number_format As String) As PtWField
     ' Add new data field and store it in p_data_fields_dict
     ' Return the new data field
 
@@ -620,8 +620,8 @@ Public Function add_data_field(field_name As String, _
         Exit Function
     End If
     
-    Dim ptfield As clsPtField
-    Set ptfield = New clsPtField
+    Dim ptfield As PtWField
+    Set ptfield = New PtWField
     
     ptfield.init_data field_name, _
             source_field_name, _
@@ -639,7 +639,7 @@ End Function
 Public Function add_page_field(field_name As String, _
         position As Long, _
         Optional key As String, _
-        Optional current_page As String) As clsPtField
+        Optional current_page As String) As PtWField
     ' Add new page field and store it in p_page_fields_dict
     ' Return the new page field
     
@@ -651,8 +651,8 @@ Public Function add_page_field(field_name As String, _
         Exit Function
     End If
     
-    Dim ptfield As clsPtField
-    Set ptfield = New clsPtField
+    Dim ptfield As PtWField
+    Set ptfield = New PtWField
     
     ptfield.init_page field_name, _
             position, _
@@ -699,11 +699,11 @@ Public Function set_null_display(display_empty As Boolean, Optional null_string 
 End Function
 
 
-Public Function remove_row_field(field_name As String, Optional is_key As Boolean) As clsPtField
+Public Function remove_row_field(field_name As String, Optional is_key As Boolean) As PtWField
     ' Removes row field from dictionary
     ' Returns removed row field
     
-    Dim pt_field As clsPtField
+    Dim pt_field As PtWField
     
     Set pt_field = pop_field(p_row_fields_dict, field_name, is_key)
     Set remove_row_field = pt_field
@@ -711,11 +711,11 @@ Public Function remove_row_field(field_name As String, Optional is_key As Boolea
 End Function
 
 
-Public Function remove_column_field(field_name As String, Optional is_key As Boolean) As clsPtField
+Public Function remove_column_field(field_name As String, Optional is_key As Boolean) As PtWField
     ' Removes column field from dictionary
     ' Returns removed column field
     
-    Dim pt_field As clsPtField
+    Dim pt_field As PtWField
     
     Set pt_field = pop_field(p_column_fields_dict, field_name, is_key)
     Set remove_column_field = pt_field
@@ -723,11 +723,11 @@ Public Function remove_column_field(field_name As String, Optional is_key As Boo
 End Function
 
 
-Public Function remove_page_field(field_name As String, Optional is_key As Boolean) As clsPtField
+Public Function remove_page_field(field_name As String, Optional is_key As Boolean) As PtWField
     ' Removes page field from dictionary
     ' Returns removed page field
     
-    Dim pt_field As clsPtField
+    Dim pt_field As PtWField
     
     Set pt_field = pop_field(p_page_fields_dict, field_name, is_key)
     Set remove_page_field = pt_field
@@ -735,11 +735,11 @@ Public Function remove_page_field(field_name As String, Optional is_key As Boole
 End Function
 
 
-Public Function remove_data_field(field_name As String, Optional is_key As Boolean) As clsPtField
+Public Function remove_data_field(field_name As String, Optional is_key As Boolean) As PtWField
     ' Removes data field from dictionary
     ' Returns removed data field
     
-    Dim pt_field As clsPtField
+    Dim pt_field As PtWField
     
     Set pt_field = pop_field(p_data_fields_dict, field_name, is_key)
     Set remove_data_field = pt_field
@@ -750,16 +750,16 @@ End Function
 Private Function add_rowcolpage_fields(ByRef field_names As Variant, _
         ByRef keys As Variant, _
         ByRef positions As Variant, _
-        orientation As XlPivotFieldOrientation) As clsPtField()
+        orientation As XlPivotFieldOrientation) As PtWField()
     ' Calls add_row/column_field for each element in field_names
-    ' Returns an array of clsPtFields
+    ' Returns an array of PtWFields
     ' Used in add_row_fields and add_column_fields
     
     Dim i As Long
     Dim position_arr() As Long
     Dim key_arr() As String
     Dim field_orientation As String
-    Dim pt_fields() As clsPtField
+    Dim pt_fields() As PtWField
     
     If orientation = xlRowField Then
         field_orientation = "add_row_fields"
@@ -781,7 +781,7 @@ Private Function add_rowcolpage_fields(ByRef field_names As Variant, _
         End
     End If
     
-    ReDim pt_fields(0 To UBound(field_names)) As clsPtField
+    ReDim pt_fields(0 To UBound(field_names)) As PtWField
     
     If orientation = xlRowField Then
         For i = LBound(field_names) To UBound(field_names)
@@ -802,11 +802,11 @@ Private Function add_rowcolpage_fields(ByRef field_names As Variant, _
 End Function
 
 
-Private Function pop_field(d As Scripting.Dictionary, field_name As String, is_key As Boolean) As clsPtField
+Private Function pop_field(d As Scripting.Dictionary, field_name As String, is_key As Boolean) As PtWField
     ' Removes dictionary element if field_name is found in dictionary
     ' Searches in dictionary keys if is_key is True, otherwise searchs in get_field_name property of dictionary item
     
-    Dim pt_field As clsPtField
+    Dim pt_field As PtWField
     Dim i As Long
     
     For i = 0 To d.Count - 1
@@ -872,15 +872,15 @@ Public Function create(Optional destination_row As Long, _
     Dim destination_range As Range
     Dim destination_worksheet As Worksheet
     
-    Dim clsPtField_rows() As clsPtField
-    Dim clsPtField_columns() As clsPtField
-    Dim clsPtField_datas() As clsPtField
-    Dim clsPtField_pages() As clsPtField
+    Dim PtWField_rows() As PtWField
+    Dim PtWField_columns() As PtWField
+    Dim PtWField_datas() As PtWField
+    Dim PtWField_pages() As PtWField
     
-    Dim ptField_rows() As PivotField
-    Dim ptField_columns() As PivotField
-    Dim ptField_datas() As PivotField
-    Dim ptField_pages() As PivotField
+    Dim PtField_rows() As PivotField
+    Dim PtField_columns() As PivotField
+    Dim PtField_datas() As PivotField
+    Dim PtField_pages() As PivotField
     
     ' Set workbook and worksheet
     Set destination_workbook = get_workbook(destination_workbook)
@@ -903,38 +903,38 @@ Public Function create(Optional destination_row As Long, _
         Exit Function
     End If
     
-    ' Retrieve clsPtFields arrays, sorted by position
-    clsPtField_rows = populate_input_fields(p_row_fields_dict, row_keys, "Row Fields")
-    clsPtField_columns = populate_input_fields(p_column_fields_dict, column_keys, "Column Fields")
-    clsPtField_datas = populate_input_fields(p_data_fields_dict, data_keys, "Data Fields")
-    clsPtField_pages = populate_input_fields(p_page_fields_dict, page_keys, "Page Fields")
+    ' Retrieve PtWFields arrays, sorted by position
+    PtWField_rows = populate_input_fields(p_row_fields_dict, row_keys, "Row Fields")
+    PtWField_columns = populate_input_fields(p_column_fields_dict, column_keys, "Column Fields")
+    PtWField_datas = populate_input_fields(p_data_fields_dict, data_keys, "Data Fields")
+    PtWField_pages = populate_input_fields(p_page_fields_dict, page_keys, "Page Fields")
     
-    ' Add clsPtFields to pivot table, return arrays of PivotField
-    ptField_rows = apply_rowcolpage_pt_fields(pt, clsPtField_rows)
-    ptField_columns = apply_rowcolpage_pt_fields(pt, clsPtField_columns)
-    ptField_pages = apply_rowcolpage_pt_fields(pt, clsPtField_pages)
-    ptField_datas = apply_data_pt_fields(pt, clsPtField_datas)
+    ' Add PtWFields to pivot table, return arrays of PivotField
+    PtField_rows = apply_rowcolpage_pt_fields(pt, PtWField_rows)
+    PtField_columns = apply_rowcolpage_pt_fields(pt, PtWField_columns)
+    PtField_pages = apply_rowcolpage_pt_fields(pt, PtWField_pages)
+    PtField_datas = apply_data_pt_fields(pt, PtWField_datas)
     
     ' Set row/column sorting
-    apply_rowcol_sort clsPtField_rows, ptField_rows
-    apply_rowcol_sort clsPtField_columns, ptField_columns
+    apply_rowcol_sort PtWField_rows, PtField_rows
+    apply_rowcol_sort PtWField_columns, PtField_columns
     
     ' Set row/column manual filter (i.e. the list box with check marks in the row/column drop-down menu)
-    apply_rowcol_manual_filter clsPtField_rows, ptField_rows
-    apply_rowcol_manual_filter clsPtField_columns, ptField_columns
+    apply_rowcol_manual_filter PtWField_rows, PtField_rows
+    apply_rowcol_manual_filter PtWField_columns, PtField_columns
     
     ' Set row/column filters (i.e. top 10, label filter, value filter) in pivot table
-    apply_rowcol_filter clsPtField_rows, ptField_rows
-    apply_rowcol_filter clsPtField_columns, ptField_columns
+    apply_rowcol_filter PtWField_rows, PtField_rows
+    apply_rowcol_filter PtWField_columns, PtField_columns
     
     ' Set page filters (i.e. current page(s)) in pivot table
-    apply_page_filter clsPtField_pages, ptField_pages
+    apply_page_filter PtWField_pages, PtField_pages
     
     ' Set pivot table formatting (i.e. PivotTable Options menu)
-    apply_pt_options pt, ptField_rows, ptField_columns
+    apply_pt_options pt, PtField_rows, PtField_columns
     
     ' Set data pivot field (i.e. Sigma Value in Field List)
-    apply_datapivot_field pt, ptField_rows, ptField_columns, ptField_datas
+    apply_datapivot_field pt, PtField_rows, PtField_columns, PtField_datas
     
     ' Add pivot table to dictionary
     update_pivot_table_dict pt
@@ -993,11 +993,11 @@ Private Function update_pivot_table_dict(pt As PivotTable) As Boolean
 End Function
 
 
-Private Function apply_rowcol_sort(cls_pt_fields() As clsPtField, pt_fields() As PivotField) As Boolean
+Private Function apply_rowcol_sort(cls_pt_fields() As PtWField, pt_fields() As PivotField) As Boolean
     ' Applies row and column sorting
     ' Called by create()
     
-    Dim cls_pt_field As clsPtField
+    Dim cls_pt_field As PtWField
     Dim pt_field As PivotField
     Dim i As Long
     
@@ -1019,11 +1019,11 @@ Private Function apply_rowcol_sort(cls_pt_fields() As clsPtField, pt_fields() As
 End Function
 
 
-Private Function apply_rowcol_filter(cls_pt_fields() As clsPtField, pt_fields() As PivotField) As Boolean
+Private Function apply_rowcol_filter(cls_pt_fields() As PtWField, pt_fields() As PivotField) As Boolean
     ' Applies row and column filters
     ' Called by create()
     
-    Dim cls_pt_field As clsPtField
+    Dim cls_pt_field As PtWField
     Dim pt_field As PivotField
     Dim i As Long
     
@@ -1049,11 +1049,11 @@ Private Function apply_rowcol_filter(cls_pt_fields() As clsPtField, pt_fields() 
 End Function
 
 
-Private Function apply_rowcol_manual_filter(cls_pt_fields() As clsPtField, pt_fields() As PivotField) As Boolean
+Private Function apply_rowcol_manual_filter(cls_pt_fields() As PtWField, pt_fields() As PivotField) As Boolean
     ' Applies manual filter for row/column
     ' Called by create()
     
-    Dim cls_pt_field As clsPtField
+    Dim cls_pt_field As PtWField
     Dim pt_field As PivotField
     
     Dim pivot_item As PivotItem
@@ -1120,11 +1120,11 @@ Private Function apply_rowcol_manual_filter(cls_pt_fields() As clsPtField, pt_fi
 End Function
 
 
-Private Function apply_page_filter(cls_pt_fields() As clsPtField, pt_fields() As PivotField) As Boolean
+Private Function apply_page_filter(cls_pt_fields() As PtWField, pt_fields() As PivotField) As Boolean
     ' Applies page filters
     ' Called by create()
     
-    Dim cls_pt_field As clsPtField
+    Dim cls_pt_field As PtWField
     Dim pt_field As PivotField
     
     Dim pivot_item As PivotItem
@@ -1255,7 +1255,7 @@ Private Function apply_datapivot_field(ByRef pt As PivotTable, _
 End Function
 
 
-Private Function apply_rowcolpage_pt_fields(ByRef pt As PivotTable, ByRef input_fields() As clsPtField)
+Private Function apply_rowcolpage_pt_fields(ByRef pt As PivotTable, ByRef input_fields() As PtWField)
     ' Populates row/column/page fields in pt
     ' Called by create()
     
@@ -1281,7 +1281,7 @@ Private Function apply_rowcolpage_pt_fields(ByRef pt As PivotTable, ByRef input_
 End Function
 
 
-Private Function apply_data_pt_fields(ByRef pt As PivotTable, ByRef input_fields() As clsPtField)
+Private Function apply_data_pt_fields(ByRef pt As PivotTable, ByRef input_fields() As PtWField)
     ' Populates data fields in pt
     ' Called by create()
     
@@ -1309,24 +1309,24 @@ Private Function apply_data_pt_fields(ByRef pt As PivotTable, ByRef input_fields
 End Function
 
 
-Private Function populate_input_fields(dict As Scripting.Dictionary, Optional keys As Variant, Optional dict_name As String) As clsPtField()
-    ' Collects clsPtFields from provided dict
+Private Function populate_input_fields(dict As Scripting.Dictionary, Optional keys As Variant, Optional dict_name As String) As PtWField()
+    ' Collects PtWFields from provided dict
     ' Uses all elements in dict if keys is not provided, other select only items with corresponding keys
     ' dict_name is used to MsgBox display purposes only
-    ' Returns collected clsPtFields array
+    ' Returns collected PtWFields array
 
-    Dim arr() As clsPtField
+    Dim arr() As PtWField
     Dim key As Variant
     Dim i As Long
     
     If dict.Count = 0 Then ' No ptFields in dictionary
-        ReDim arr(-1 To -1) As clsPtField
+        ReDim arr(-1 To -1) As PtWField
         populate_input_fields = arr
         Exit Function
     End If
     
     If IsEmpty(keys) Or IsMissing(keys) Then 'use all ptFields in dictionary, and sort by ptFields.position
-        ReDim arr(0 To dict.Count - 1) As clsPtField
+        ReDim arr(0 To dict.Count - 1) As PtWField
         For i = LBound(arr) To UBound(arr)
             Set arr(i) = dict.Items(i)
         Next i
@@ -1336,7 +1336,7 @@ Private Function populate_input_fields(dict As Scripting.Dictionary, Optional ke
             keys = Array(keys)
         End If
         
-        ReDim arr(0 To UBound(keys) - LBound(keys)) As clsPtField
+        ReDim arr(0 To UBound(keys) - LBound(keys)) As PtWField
         
         On Error GoTo KeyErr:
         For i = LBound(arr) To UBound(arr)
@@ -1355,12 +1355,12 @@ KeyErr:
 End Function
 
 
-Private Sub sort_input_fields(ByRef input_fields() As clsPtField)
+Private Sub sort_input_fields(ByRef input_fields() As PtWField)
     ' Sorts fields based on their position property
     ' The deciding position of a field is not based on its position property, but on its position in the array
     ' Returns sorted array
     
-    Dim current As clsPtField
+    Dim current As PtWField
     Dim i As Long, j As Long
     
     For i = LBound(input_fields) To UBound(input_fields)
@@ -1462,7 +1462,7 @@ Private Function val_field_name_is_not_duplicate(field_name As String, dict As S
     ' Used in validate_field_name_inputs
     
     Dim i As Long
-    Dim pt_field As clsPtField
+    Dim pt_field As PtWField
     
     For i = 0 To dict.Count - 1
         Set pt_field = dict.Items(i)

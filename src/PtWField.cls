@@ -24,6 +24,7 @@ Private p_rowcol_filter_value2 As String
 
 Private p_rowcol_manual_filter_values As Variant
 Private p_rowcol_subtotal_visible As Boolean
+Private p_rowcol_blank_line_insert As Boolean
 
 Private p_data_function As XlConsolidationFunction
 Private p_data_calculation As XlPivotFieldCalculation
@@ -39,6 +40,7 @@ Sub init_row(field_name As String, _
         Optional sort_by As String, _
         Optional sort_order As XlSortOrder = xlAscending, _
         Optional subtotal_visible As Boolean = True, _
+        Optional blank_line_insert As Boolean = False, _
         Optional filter_type As XlPivotFilterType, _
         Optional filter_by_field_name As String, _
         Optional filter_value1 As String, _
@@ -47,7 +49,7 @@ Sub init_row(field_name As String, _
     ' Initialize Row Field
         
     init_rowcol field_name, xlRowField, position, _
-            sort_by, sort_order, subtotal_visible, filter_type, filter_by_field_name, _
+            sort_by, sort_order, subtotal_visible, blank_line_insert, filter_type, filter_by_field_name, _
             filter_value1, filter_value2, manual_filter_values
     
 End Sub
@@ -58,6 +60,7 @@ Sub init_col(field_name As String, _
         Optional sort_by As String, _
         Optional sort_order As XlSortOrder = xlAscending, _
         Optional subtotal_visible As Boolean = True, _
+        Optional blank_line_insert As Boolean = False, _
         Optional filter_type As XlPivotFilterType, _
         Optional filter_by_field_name As String, _
         Optional filter_value1 As String, _
@@ -66,7 +69,7 @@ Sub init_col(field_name As String, _
     ' Initialize Column Field
     
     init_rowcol field_name, xlColumnField, position, _
-            sort_by, sort_order, subtotal_visible, filter_type, filter_by_field_name, _
+            sort_by, sort_order, subtotal_visible, blank_line_insert, filter_type, filter_by_field_name, _
             filter_value1, filter_value2, manual_filter_values
     
 End Sub
@@ -111,6 +114,7 @@ Private Sub init_rowcol(field_name As String, _
         Optional sort_by As String, _
         Optional sort_order As XlSortOrder = xlAscending, _
         Optional subtotal_visible As Boolean = True, _
+        Optional blank_line_insert As Boolean = False, _
         Optional filter_type As XlPivotFilterType, _
         Optional filter_by_field_name As String, _
         Optional filter_value1 As String, _
@@ -123,6 +127,7 @@ Private Sub init_rowcol(field_name As String, _
     set_rowcol_sort_by_field_name sort_by
     set_rowcol_sort_order sort_order
     set_rowcol_subtotal_visible subtotal_visible
+    set_rowcol_blank_line_insert blank_line_insert
     
     set_rowcol_filter_type filter_type
     set_rowcol_filter_by_field_name filter_by_field_name
@@ -284,6 +289,17 @@ End Function
 Public Function set_rowcol_subtotal_visible(subtotal_visible As Boolean) As Boolean
     p_rowcol_subtotal_visible = subtotal_visible
     set_rowcol_subtotal_visible = True
+End Function
+
+
+Public Function get_rowcol_blank_line_insert() As Boolean
+    get_rowcol_blank_line_insert = p_rowcol_blank_line_insert
+End Function
+
+
+Public Function set_rowcol_blank_line_insert(blank_line_insert As Boolean) As Boolean
+    p_rowcol_blank_line_insert = blank_line_insert
+    set_rowcol_blank_line_insert = True
 End Function
 
 

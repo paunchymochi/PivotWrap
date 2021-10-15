@@ -4,7 +4,11 @@
 
 ### Added
 
-- Row/Column blank line insert
+- Row/Column field options
+  - blank line insert
+  - show all items
+  - repeat labels
+  - subtotal location
 
 ### Changed
 - Merge row/column subtotal & blankline apply functions into apply_rowcol_options function

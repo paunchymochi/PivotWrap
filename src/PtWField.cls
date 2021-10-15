@@ -25,6 +25,9 @@ Private p_rowcol_filter_value2 As String
 Private p_rowcol_manual_filter_values As Variant
 Private p_rowcol_subtotal_visible As Boolean
 Private p_rowcol_blank_line_insert As Boolean
+Private p_rowcol_subtotal_location As XlSubtototalLocationType
+Private p_rowcol_repeat_labels As Boolean
+Private p_rowcol_show_all_items As Boolean
 
 Private p_data_function As XlConsolidationFunction
 Private p_data_calculation As XlPivotFieldCalculation
@@ -39,18 +42,35 @@ Sub init_row(field_name As String, _
         position As Long, _
         Optional sort_by As String, _
         Optional sort_order As XlSortOrder = xlAscending, _
-        Optional subtotal_visible As Boolean = True, _
-        Optional blank_line_insert As Boolean = False, _
         Optional filter_type As XlPivotFilterType, _
         Optional filter_by_field_name As String, _
         Optional filter_value1 As String, _
         Optional filter_value2 As String, _
-        Optional manual_filter_values As Variant = "")
+        Optional manual_filter_values As Variant = "", _
+        Optional subtotal_visible As Boolean = True, _
+        Optional subtotal_location As XlSubtototalLocationType = xlAtTop, _
+        Optional blank_line_insert As Boolean = False, _
+        Optional show_all_items As Boolean = False, _
+        Optional repeat_labels As Boolean = False)
+        
     ' Initialize Row Field
         
-    init_rowcol field_name, xlRowField, position, _
-            sort_by, sort_order, subtotal_visible, blank_line_insert, filter_type, filter_by_field_name, _
-            filter_value1, filter_value2, manual_filter_values
+    init_rowcol _
+            field_name:=field_name, _
+            orientation:=xlRowField, _
+            position:=position, _
+            sort_by:=sort_by, _
+            sort_order:=sort_order, _
+            filter_type:=filter_type, _
+            filter_by_field_name:=filter_by_field_name, _
+            filter_value1:=filter_value1, _
+            filter_value2:=filter_value2, _
+            manual_filter_values:=manual_filter_values, _
+            subtotal_visible:=subtotal_visible, _
+            subtotal_location:=subtotal_location, _
+            blank_line_insert:=blank_line_insert, _
+            show_all_items:=show_all_items, _
+            repeat_labels:=repeat_labels
     
 End Sub
 
@@ -59,19 +79,36 @@ Sub init_col(field_name As String, _
         position As Long, _
         Optional sort_by As String, _
         Optional sort_order As XlSortOrder = xlAscending, _
-        Optional subtotal_visible As Boolean = True, _
-        Optional blank_line_insert As Boolean = False, _
         Optional filter_type As XlPivotFilterType, _
         Optional filter_by_field_name As String, _
         Optional filter_value1 As String, _
         Optional filter_value2 As String, _
-        Optional manual_filter_values As Variant = "")
+        Optional manual_filter_values As Variant = "", _
+        Optional subtotal_visible As Boolean = True, _
+        Optional subtotal_location As XlSubtototalLocationType = xlAtTop, _
+        Optional blank_line_insert As Boolean = False, _
+        Optional show_all_items As Boolean = False, _
+        Optional repeat_labels As Boolean = False)
+        
     ' Initialize Column Field
     
-    init_rowcol field_name, xlColumnField, position, _
-            sort_by, sort_order, subtotal_visible, blank_line_insert, filter_type, filter_by_field_name, _
-            filter_value1, filter_value2, manual_filter_values
-    
+    init_rowcol _
+            field_name:=field_name, _
+            orientation:=xlColumnField, _
+            position:=position, _
+            sort_by:=sort_by, _
+            sort_order:=sort_order, _
+            filter_type:=filter_type, _
+            filter_by_field_name:=filter_by_field_name, _
+            filter_value1:=filter_value1, _
+            filter_value2:=filter_value2, _
+            manual_filter_values:=manual_filter_values, _
+            subtotal_visible:=subtotal_visible, _
+            subtotal_location:=subtotal_location, _
+            blank_line_insert:=blank_line_insert, _
+            show_all_items:=show_all_items, _
+            repeat_labels:=repeat_labels
+            
 End Sub
 
 
@@ -113,13 +150,16 @@ Private Sub init_rowcol(field_name As String, _
         position As Long, _
         Optional sort_by As String, _
         Optional sort_order As XlSortOrder = xlAscending, _
-        Optional subtotal_visible As Boolean = True, _
-        Optional blank_line_insert As Boolean = False, _
         Optional filter_type As XlPivotFilterType, _
         Optional filter_by_field_name As String, _
         Optional filter_value1 As String, _
         Optional filter_value2 As String, _
-        Optional manual_filter_values As Variant = "")
+        Optional manual_filter_values As Variant = "", _
+        Optional subtotal_visible As Boolean = True, _
+        Optional subtotal_location As XlSubtototalLocationType = xlAtTop, _
+        Optional blank_line_insert As Boolean = False, _
+        Optional show_all_items As Boolean = False, _
+        Optional repeat_labels As Boolean = False)
     ' Shared code for initializing Row and Column Fields
         
     init field_name, field_name, orientation, position
@@ -127,7 +167,10 @@ Private Sub init_rowcol(field_name As String, _
     set_rowcol_sort_by_field_name sort_by
     set_rowcol_sort_order sort_order
     set_rowcol_subtotal_visible subtotal_visible
+    set_rowcol_subtotal_location subtotal_location
     set_rowcol_blank_line_insert blank_line_insert
+    set_rowcol_show_all_items show_all_items
+    set_rowcol_repeat_labels repeat_labels
     
     set_rowcol_filter_type filter_type
     set_rowcol_filter_by_field_name filter_by_field_name
@@ -292,6 +335,18 @@ Public Function set_rowcol_subtotal_visible(subtotal_visible As Boolean) As Bool
 End Function
 
 
+Public Function get_rowcol_subtotal_location() As XlSubtototalLocationType
+    get_rowcol_subtotal_location = p_rowcol_subtotal_location
+End Function
+
+
+Public Function set_rowcol_subtotal_location(subtotal_location As XlSubtototalLocationType) As Boolean
+    If subtotal_location = 0 Then subtotal_location = xlAtTop
+    p_rowcol_subtotal_location = subtotal_location
+    set_rowcol_subtotal_location = True
+End Function
+
+
 Public Function get_rowcol_blank_line_insert() As Boolean
     get_rowcol_blank_line_insert = p_rowcol_blank_line_insert
 End Function
@@ -300,6 +355,28 @@ End Function
 Public Function set_rowcol_blank_line_insert(blank_line_insert As Boolean) As Boolean
     p_rowcol_blank_line_insert = blank_line_insert
     set_rowcol_blank_line_insert = True
+End Function
+
+
+Public Function get_rowcol_repeat_labels() As Boolean
+    get_rowcol_repeat_labels = p_rowcol_repeat_labels
+End Function
+
+
+Public Function set_rowcol_repeat_labels(repeat_labels As Boolean) As Boolean
+    p_rowcol_repeat_labels = repeat_labels
+    set_rowcol_repeat_labels = True
+End Function
+
+
+Public Function get_rowcol_show_all_items() As Boolean
+    get_rowcol_show_all_items = p_rowcol_show_all_items
+End Function
+
+
+Public Function set_rowcol_show_all_items(show_all_items As Boolean) As Boolean
+    p_rowcol_show_all_items = show_all_items
+    set_rowcol_show_all_items = True
 End Function
 
 

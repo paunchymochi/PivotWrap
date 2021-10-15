@@ -528,13 +528,17 @@ Public Function add_row_field(field_name As String, _
         Optional key As String, _
         Optional sort_by As String, _
         Optional sort_order As XlSortOrder = xlAscending, _
-        Optional subtotal_visible As Boolean = True, _
-        Optional blank_line_insert As Boolean = False, _
         Optional filter_type As XlPivotFilterType, _
         Optional filter_by_field_name As String, _
         Optional filter_value1 As String, _
         Optional filter_value2 As String, _
-        Optional manual_filter_values As Variant) As PtWField
+        Optional manual_filter_values As Variant, _
+        Optional subtotal_visible As Boolean = True, _
+        Optional subtotal_location As XlSubtototalLocationType = xlAtTop, _
+        Optional blank_line_insert As Boolean = False, _
+        Optional show_all_items As Boolean = False, _
+        Optional repeat_labels As Boolean = False _
+        ) As PtWField
     ' Add new row field and store it in p_row_fields_dict
     ' Return the new row field
     
@@ -549,18 +553,21 @@ Public Function add_row_field(field_name As String, _
     Dim ptfield As PtWField
     Set ptfield = New PtWField
     
-    ptfield.init_row field_name, _
+    ptfield.init_row _
+            field_name, _
             position, _
             sort_by, _
             sort_order, _
-            subtotal_visible, _
-            blank_line_insert, _
             filter_type, _
             filter_by_field_name, _
             filter_value1, _
             filter_value2, _
-            manual_filter_values
-    
+            manual_filter_values, _
+            subtotal_visible, _
+            subtotal_location, _
+            blank_line_insert, _
+            show_all_items, _
+            repeat_labels
 
     p_row_fields_dict.Add key, ptfield
     Set add_row_field = ptfield
@@ -573,13 +580,17 @@ Public Function add_column_field(field_name As String, _
         Optional key As String, _
         Optional sort_by As String, _
         Optional sort_order As XlSortOrder = xlAscending, _
-        Optional subtotal_visible As Boolean = True, _
-        Optional blank_line_insert As Boolean = False, _
         Optional filter_type As XlPivotFilterType, _
         Optional filter_by_field_name As String, _
         Optional filter_value1 As String, _
         Optional filter_value2 As String, _
-        Optional manual_filter_values As Variant) As PtWField
+        Optional manual_filter_values As Variant, _
+        Optional subtotal_visible As Boolean = True, _
+        Optional subtotal_location As XlSubtototalLocationType = xlAtTop, _
+        Optional blank_line_insert As Boolean = False, _
+        Optional show_all_items As Boolean = False, _
+        Optional repeat_labels As Boolean = False _
+        ) As PtWField
     ' Add new column field and store it in p_row_fields_dict
     ' Return the new column field
     
@@ -594,17 +605,21 @@ Public Function add_column_field(field_name As String, _
     Dim ptfield As PtWField
     Set ptfield = New PtWField
     
-    ptfield.init_col field_name, _
+    ptfield.init_col _
+            field_name, _
             position, _
             sort_by, _
             sort_order, _
-            subtotal_visible, _
-            blank_line_insert, _
             filter_type, _
             filter_by_field_name, _
             filter_value1, _
             filter_value2, _
-            manual_filter_values
+            manual_filter_values, _
+            subtotal_visible, _
+            subtotal_location, _
+            blank_line_insert, _
+            show_all_items, _
+            repeat_labels
     
     p_column_fields_dict.Add key, ptfield
     Set add_column_field = ptfield
@@ -1072,8 +1087,18 @@ Private Function apply_rowcol_options(cls_pt_fields() As PtWField, pt_fields() A
         pt_field.Subtotals(1) = True 'Set to True first to disable the other 11 subtotals
         pt_field.Subtotals(1) = cls_pt_field.get_rowcol_subtotal_visible()
         
+        ' Set subtotal location
+        pt_field.LayoutSubtotalLocation = cls_pt_field.get_rowcol_subtotal_location()
+        
         ' Apply blank line
         pt_field.LayoutBlankLine = cls_pt_field.get_rowcol_blank_line_insert()
+        
+        ' Apply repeat labels
+        pt_field.RepeatLabels = cls_pt_field.get_rowcol_repeat_labels()
+        
+        ' Apply show all items
+        pt_field.ShowAllItems = cls_pt_field.get_rowcol_show_all_items()
+        
     Next i
     
     apply_rowcol_options = True

@@ -6,6 +6,9 @@
 
 - Row/Column blank line insert
 
+### Changed
+- Merge row/column subtotal & blankline apply functions into apply_rowcol_options function
+
 ## [0.1.2] - 2021-10-16
 
 ### Added

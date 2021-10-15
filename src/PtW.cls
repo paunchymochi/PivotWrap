@@ -208,7 +208,7 @@ Public Function get_column_names() As String()
     Dim strings() As String
     Dim i As Long
     
-    ReDim strings(0 To p_source_data.columns.Count - 1) As String
+    ReDim strings(0 To p_source_data.Columns.Count - 1) As String
     For i = 0 To UBound(strings)
         strings(i) = p_source_data.Cells(1, 1 + i).Value
     Next i
@@ -528,13 +528,17 @@ Public Function add_row_field(field_name As String, _
         Optional key As String, _
         Optional sort_by As String, _
         Optional sort_order As XlSortOrder = xlAscending, _
-        Optional subtotal_visible As Boolean = True, _
-        Optional blank_line_insert As Boolean = False, _
         Optional filter_type As XlPivotFilterType, _
         Optional filter_by_field_name As String, _
         Optional filter_value1 As String, _
         Optional filter_value2 As String, _
-        Optional manual_filter_values As Variant) As PtWField
+        Optional manual_filter_values As Variant, _
+        Optional subtotal_visible As Boolean = True, _
+        Optional subtotal_location As XlSubtototalLocationType = xlAtTop, _
+        Optional blank_line_insert As Boolean = False, _
+        Optional show_all_items As Boolean = False, _
+        Optional repeat_labels As Boolean = False _
+        ) As PtWField
     ' Add new row field and store it in p_row_fields_dict
     ' Return the new row field
     
@@ -549,18 +553,21 @@ Public Function add_row_field(field_name As String, _
     Dim ptfield As PtWField
     Set ptfield = New PtWField
     
-    ptfield.init_row field_name, _
+    ptfield.init_row _
+            field_name, _
             position, _
             sort_by, _
             sort_order, _
-            subtotal_visible, _
-            blank_line_insert, _
             filter_type, _
             filter_by_field_name, _
             filter_value1, _
             filter_value2, _
-            manual_filter_values
-    
+            manual_filter_values, _
+            subtotal_visible, _
+            subtotal_location, _
+            blank_line_insert, _
+            show_all_items, _
+            repeat_labels
 
     p_row_fields_dict.Add key, ptfield
     Set add_row_field = ptfield
@@ -573,13 +580,17 @@ Public Function add_column_field(field_name As String, _
         Optional key As String, _
         Optional sort_by As String, _
         Optional sort_order As XlSortOrder = xlAscending, _
-        Optional subtotal_visible As Boolean = True, _
-        Optional blank_line_insert As Boolean = False, _
         Optional filter_type As XlPivotFilterType, _
         Optional filter_by_field_name As String, _
         Optional filter_value1 As String, _
         Optional filter_value2 As String, _
-        Optional manual_filter_values As Variant) As PtWField
+        Optional manual_filter_values As Variant, _
+        Optional subtotal_visible As Boolean = True, _
+        Optional subtotal_location As XlSubtototalLocationType = xlAtTop, _
+        Optional blank_line_insert As Boolean = False, _
+        Optional show_all_items As Boolean = False, _
+        Optional repeat_labels As Boolean = False _
+        ) As PtWField
     ' Add new column field and store it in p_row_fields_dict
     ' Return the new column field
     
@@ -594,17 +605,21 @@ Public Function add_column_field(field_name As String, _
     Dim ptfield As PtWField
     Set ptfield = New PtWField
     
-    ptfield.init_col field_name, _
+    ptfield.init_col _
+            field_name, _
             position, _
             sort_by, _
             sort_order, _
-            subtotal_visible, _
-            blank_line_insert, _
             filter_type, _
             filter_by_field_name, _
             filter_value1, _
             filter_value2, _
-            manual_filter_values
+            manual_filter_values, _
+            subtotal_visible, _
+            subtotal_location, _
+            blank_line_insert, _
+            show_all_items, _
+            repeat_labels
     
     p_column_fields_dict.Add key, ptfield
     Set add_column_field = ptfield
@@ -959,14 +974,9 @@ Public Function create(Optional destination_row As Long, _
     ' Set data pivot field (i.e. Sigma Value in Field List)
     apply_datapivot_field pt, PtField_rows, PtField_columns, PtField_datas
     
-    
-    ' Set subtotal visibility
-    apply_rowcol_subtotal_visible PtWField_rows, PtField_rows
-    apply_rowcol_subtotal_visible PtWField_columns, PtField_columns
-    
-    ' Set blank line
-    apply_rowcol_blank_line_insert PtWField_rows, PtField_rows
-    apply_rowcol_blank_line_insert PtWField_columns, PtField_columns
+    ' Set row/column field options
+    apply_rowcol_options PtWField_rows, PtField_rows
+    apply_rowcol_options PtWField_columns, PtField_columns
     
     ' Apply title
     apply_title destination_range
@@ -1056,51 +1066,42 @@ Private Function apply_rowcol_sort(cls_pt_fields() As PtWField, pt_fields() As P
 End Function
 
 
-Private Function apply_rowcol_subtotal_visible(cls_pt_fields() As PtWField, pt_fields() As PivotField) As Boolean
-    ' Applies row and column subtotal visibility
+Private Function apply_rowcol_options(cls_pt_fields() As PtWField, pt_fields() As PivotField) As Boolean
+    ' Applies row and column options
     ' Called by create()
-    
+        
     Dim cls_pt_field As PtWField
     Dim pt_field As PivotField
     Dim i As Long
     
     If UBound(cls_pt_fields) = -1 Then 'empty cls_pt_fields
-        apply_rowcol_subtotal_visible = False
+        apply_rowcol_options = False
         Exit Function
     End If
     
     For i = LBound(cls_pt_fields) To UBound(cls_pt_fields)
         Set cls_pt_field = cls_pt_fields(i)
         Set pt_field = pt_fields(i)
+        
+        ' Apply subtotal visibility
         pt_field.Subtotals(1) = True 'Set to True first to disable the other 11 subtotals
         pt_field.Subtotals(1) = cls_pt_field.get_rowcol_subtotal_visible()
-    Next i
-    
-    apply_rowcol_subtotal_visible = True
         
-End Function
-
-
-Private Function apply_rowcol_blank_line_insert(cls_pt_fields() As PtWField, pt_fields() As PivotField) As Boolean
-    ' Applies blank line after each item label if blank_line_insert is True
-    ' Called by create()
-    
-    Dim cls_pt_field As PtWField
-    Dim pt_field As PivotField
-    Dim i As Long
-    
-    If UBound(cls_pt_fields) = -1 Then 'empty cls_pt_fields
-        apply_rowcol_blank_line_insert = False
-        Exit Function
-    End If
-    
-    For i = LBound(cls_pt_fields) To UBound(cls_pt_fields)
-        Set cls_pt_field = cls_pt_fields(i)
-        Set pt_field = pt_fields(i)
+        ' Set subtotal location
+        pt_field.LayoutSubtotalLocation = cls_pt_field.get_rowcol_subtotal_location()
+        
+        ' Apply blank line
         pt_field.LayoutBlankLine = cls_pt_field.get_rowcol_blank_line_insert()
+        
+        ' Apply repeat labels
+        pt_field.RepeatLabels = cls_pt_field.get_rowcol_repeat_labels()
+        
+        ' Apply show all items
+        pt_field.ShowAllItems = cls_pt_field.get_rowcol_show_all_items()
+        
     Next i
     
-    apply_rowcol_blank_line_insert = True
+    apply_rowcol_options = True
     
 End Function
 
@@ -1613,7 +1614,7 @@ Private Function validate_source_data(ByVal source_data As Range) As Range
     
     Set d = New Scripting.Dictionary
     
-    If source_data.columns.Count < 2 Then ' Pivot tables must have at least 2 columns
+    If source_data.Columns.Count < 2 Then ' Pivot tables must have at least 2 columns
         Exit Function
     End If
     
@@ -1625,7 +1626,7 @@ Private Function validate_source_data(ByVal source_data As Range) As Range
     Set source_data = source_data.Resize(1, 1).CurrentRegion
     
     ' Check if headers are unique
-    For i = 0 To source_data.columns.Count - 1
+    For i = 0 To source_data.Columns.Count - 1
         header = source_data.Resize(1, 1).Offset(0, i).Value
         If header = vbNullString Then ' Empty header
             source_data.Value = "Column 1" ' Directly overwrite range with default
@@ -1661,7 +1662,7 @@ Private Function validate_destination_range( _
     
     With Range(destination_ws.[A1], destination_ws.UsedRange)
         used_rows = .rows.Count
-        used_columns = .columns.Count
+        used_columns = .Columns.Count
     End With
     
     If destination_row = 0 And destination_column = 0 Then

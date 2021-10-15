@@ -528,6 +528,7 @@ Public Function add_row_field(field_name As String, _
         Optional key As String, _
         Optional sort_by As String, _
         Optional sort_order As XlSortOrder = xlAscending, _
+        Optional subtotal_visible As Boolean = True, _
         Optional filter_type As XlPivotFilterType, _
         Optional filter_by_field_name As String, _
         Optional filter_value1 As String, _
@@ -551,6 +552,7 @@ Public Function add_row_field(field_name As String, _
             position, _
             sort_by, _
             sort_order, _
+            subtotal_visible, _
             filter_type, _
             filter_by_field_name, _
             filter_value1, _
@@ -569,6 +571,7 @@ Public Function add_column_field(field_name As String, _
         Optional key As String, _
         Optional sort_by As String, _
         Optional sort_order As XlSortOrder = xlAscending, _
+        Optional subtotal_visible As Boolean = True, _
         Optional filter_type As XlPivotFilterType, _
         Optional filter_by_field_name As String, _
         Optional filter_value1 As String, _
@@ -592,6 +595,7 @@ Public Function add_column_field(field_name As String, _
             position, _
             sort_by, _
             sort_order, _
+            subtotal_visible, _
             filter_type, _
             filter_by_field_name, _
             filter_value1, _
@@ -951,6 +955,11 @@ Public Function create(Optional destination_row As Long, _
     ' Set data pivot field (i.e. Sigma Value in Field List)
     apply_datapivot_field pt, PtField_rows, PtField_columns, PtField_datas
     
+    
+    ' Set subtotal visibility
+    apply_rowcol_subtotal_visible PtWField_rows, PtField_rows
+    apply_rowcol_subtotal_visible PtWField_columns, PtField_columns
+    
     ' Apply title
     apply_title destination_range
     
@@ -1033,7 +1042,34 @@ Private Function apply_rowcol_sort(cls_pt_fields() As PtWField, pt_fields() As P
                     field:=cls_pt_field.get_rowcol_sort_by_field_name()
         End If
     Next i
+    
+    apply_rowcol_sort = True
 
+End Function
+
+
+Private Function apply_rowcol_subtotal_visible(cls_pt_fields() As PtWField, pt_fields() As PivotField) As Boolean
+    ' Applies row and column subtotal visibility
+    ' Called by create()
+    
+    Dim cls_pt_field As PtWField
+    Dim pt_field As PivotField
+    Dim i As Long
+    
+    If UBound(cls_pt_fields) = -1 Then 'empty cls_pt_fields
+        apply_rowcol_subtotal_visible = False
+        Exit Function
+    End If
+    
+    For i = LBound(cls_pt_fields) To UBound(cls_pt_fields)
+        Set cls_pt_field = cls_pt_fields(i)
+        Set pt_field = pt_fields(i)
+        pt_field.Subtotals(1) = True 'Set to True first to disable the other 11 subtotals
+        pt_field.Subtotals(1) = cls_pt_field.get_rowcol_subtotal_visible()
+    Next i
+    
+    apply_rowcol_subtotal_visible = True
+        
 End Function
 
 

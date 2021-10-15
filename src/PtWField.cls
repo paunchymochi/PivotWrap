@@ -23,6 +23,7 @@ Private p_rowcol_filter_value1 As String
 Private p_rowcol_filter_value2 As String
 
 Private p_rowcol_manual_filter_values As Variant
+Private p_rowcol_subtotal_visible As Boolean
 
 Private p_data_function As XlConsolidationFunction
 Private p_data_calculation As XlPivotFieldCalculation
@@ -37,6 +38,7 @@ Sub init_row(field_name As String, _
         position As Long, _
         Optional sort_by As String, _
         Optional sort_order As XlSortOrder = xlAscending, _
+        Optional subtotal_visible As Boolean = True, _
         Optional filter_type As XlPivotFilterType, _
         Optional filter_by_field_name As String, _
         Optional filter_value1 As String, _
@@ -45,7 +47,7 @@ Sub init_row(field_name As String, _
     ' Initialize Row Field
         
     init_rowcol field_name, xlRowField, position, _
-            sort_by, sort_order, filter_type, filter_by_field_name, _
+            sort_by, sort_order, subtotal_visible, filter_type, filter_by_field_name, _
             filter_value1, filter_value2, manual_filter_values
     
 End Sub
@@ -55,6 +57,7 @@ Sub init_col(field_name As String, _
         position As Long, _
         Optional sort_by As String, _
         Optional sort_order As XlSortOrder = xlAscending, _
+        Optional subtotal_visible As Boolean = True, _
         Optional filter_type As XlPivotFilterType, _
         Optional filter_by_field_name As String, _
         Optional filter_value1 As String, _
@@ -63,7 +66,7 @@ Sub init_col(field_name As String, _
     ' Initialize Column Field
     
     init_rowcol field_name, xlColumnField, position, _
-            sort_by, sort_order, filter_type, filter_by_field_name, _
+            sort_by, sort_order, subtotal_visible, filter_type, filter_by_field_name, _
             filter_value1, filter_value2, manual_filter_values
     
 End Sub
@@ -107,6 +110,7 @@ Private Sub init_rowcol(field_name As String, _
         position As Long, _
         Optional sort_by As String, _
         Optional sort_order As XlSortOrder = xlAscending, _
+        Optional subtotal_visible As Boolean = True, _
         Optional filter_type As XlPivotFilterType, _
         Optional filter_by_field_name As String, _
         Optional filter_value1 As String, _
@@ -118,6 +122,7 @@ Private Sub init_rowcol(field_name As String, _
     
     set_rowcol_sort_by_field_name sort_by
     set_rowcol_sort_order sort_order
+    set_rowcol_subtotal_visible subtotal_visible
     
     set_rowcol_filter_type filter_type
     set_rowcol_filter_by_field_name filter_by_field_name
@@ -271,6 +276,17 @@ Public Function set_rowcol_sort(sort_order As XlSortOrder, Optional sort_by_fiel
 End Function
 
 
+Public Function get_rowcol_subtotal_visible() As Boolean
+    get_rowcol_subtotal_visible = p_rowcol_subtotal_visible
+End Function
+
+
+Public Function set_rowcol_subtotal_visible(subtotal_visible As Boolean) As Boolean
+    p_rowcol_subtotal_visible = subtotal_visible
+    set_rowcol_subtotal_visible = True
+End Function
+
+
 Public Function get_rowcol_filter_type() As XlPivotFilterType
     get_rowcol_filter_type = p_rowcol_filter_type
 End Function
@@ -374,6 +390,9 @@ End Function
 
 
 Public Function set_data_function(data_function As XlConsolidationFunction) As Boolean
+    
+    If data_function = 0 Then data_function = xlSum
+    
     p_data_function = data_function
     set_data_function = True
 End Function
@@ -385,6 +404,9 @@ End Function
 
 
 Public Function set_data_calculation(data_calculation As XlPivotFieldCalculation) As Boolean
+    
+    If data_calculation = 0 Then data_calculation = xlNoAdditionalCalculation
+    
     p_data_calculation = data_calculation
     set_data_calculation = True
 End Function
@@ -396,6 +418,9 @@ End Function
 
 
 Public Function set_data_number_format(number_format As String) As Boolean
+    
+    If number_format = "" Then number_format = "General"
+    
     p_data_number_format = number_format
     set_data_number_format = True
 End Function

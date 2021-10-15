@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Row/Column blank line insert
+
 ## [0.1.2] - 2021-10-16
 
 ### Added

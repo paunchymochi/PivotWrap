@@ -9,6 +9,7 @@
   - show all items
   - repeat labels
   - subtotal location
+  - report layout
 
 ### Changed
 - Merge row/column subtotal & blankline apply functions into apply_rowcol_options function

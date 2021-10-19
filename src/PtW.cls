@@ -31,6 +31,8 @@ Private p_pt_null_string As String
 Private p_pt_display_error_string As Boolean
 Private p_pt_display_null_string As Boolean
 
+Private p_pt_report_layout As XlLayoutRowType
+
 Private p_title As String
 
 ' === Public Property Accessors for Dictionaries ===
@@ -114,6 +116,12 @@ End Function
 Public Function get_pt_display_null_string() As Boolean
     get_pt_display_null_string = p_pt_display_null_string
 End Function
+
+
+Public Function get_pt_report_layout() As XlLayoutRowType
+    get_pt_report_layout = p_pt_report_layout
+End Function
+
 ' =====
 
 
@@ -281,6 +289,7 @@ Private Sub setup_defaults()
     p_pt_null_string = vbNullString
     p_pt_display_error_string = False
     p_pt_error_string = vbNullString
+    p_pt_report_layout = xlCompactRow
     
     'Grand Totals
     p_pt_row_grand_visible = True
@@ -730,6 +739,12 @@ Public Function set_null_display(display_empty As Boolean, Optional null_string 
     p_pt_display_null_string = display_empty
     p_pt_null_string = null_string
     set_null_display = True
+End Function
+
+
+Public Function set_report_layout(report_layout As XlLayoutRowType) As Boolean
+    ' Set report layout for PivotTable
+    p_pt_report_layout = report_layout
 End Function
 
 
@@ -1290,6 +1305,9 @@ Private Function apply_pt_options(pt As PivotTable, row_fields() As PivotField, 
     pt.DisplayNullString = p_pt_display_null_string
     pt.ErrorString = p_pt_error_string
     pt.NullString = p_pt_null_string
+    
+    ' Report Layout
+    pt.RowAxisLayout p_pt_report_layout
     
 End Function
 

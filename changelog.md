@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.1.3] - 2021-10-20
+
+### Added
+
+- Row/Column field options
+  - blank line insert
+  - show all items
+  - repeat labels
+  - subtotal location
+  - report layout
+  - row field layout
+
+### Changed
+- Merge row/column subtotal & blankline apply functions into apply_rowcol_options function
+
 ## [0.1.2] - 2021-10-16
 
 ### Added
@@ -34,6 +49,7 @@
   - Set grand totals, empty & null display
 - About section in README
 
+[0.1.3]: https://github.com/paunchymochi/PivotWrap/compare/v0.1.2...v0.1.3
 [0.1.2]: https://github.com/paunchymochi/PivotWrap/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/paunchymochi/PivotWrap/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/paunchymochi/PivotWrap/releases/tag/v0.1.0

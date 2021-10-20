@@ -533,7 +533,7 @@ End Function
 
 
 Public Function add_row_field(field_name As String, _
-        position As Long, _
+        Optional position As Long, _
         Optional key As String, _
         Optional sort_by As String, _
         Optional sort_order As XlSortOrder = xlAscending, _
@@ -587,7 +587,7 @@ End Function
 
 
 Public Function add_column_field(field_name As String, _
-        position As Long, _
+        Optional position As Long, _
         Optional key As String, _
         Optional sort_by As String, _
         Optional sort_order As XlSortOrder = xlAscending, _
@@ -640,7 +640,7 @@ End Function
 
 Public Function add_data_field(field_name As String, _
         source_field_name As String, _
-        position As Long, _
+        Optional position As Long, _
         Optional key As String, _
         Optional data_function As XlConsolidationFunction, _
         Optional data_calculation As XlPivotFieldCalculation, _
@@ -673,7 +673,7 @@ End Function
 
 
 Public Function add_page_field(field_name As String, _
-        position As Long, _
+        Optional position As Long, _
         Optional key As String, _
         Optional current_page As String) As PtWField
     ' Add new page field and store it in p_page_fields_dict
@@ -1508,7 +1508,7 @@ Private Sub sort_input_fields(ByRef input_fields() As PtWField)
         Set current = input_fields(i)
         
         For j = i - 1 To LBound(input_fields) Step -1
-            If current.get_position() < input_fields(j).get_position() Then
+            If current.get_ref_position() < input_fields(j).get_ref_position() Then
                 Set input_fields(j + 1) = input_fields(j)
             Else
                 Exit For

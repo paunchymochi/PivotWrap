@@ -546,7 +546,8 @@ Public Function add_row_field(field_name As String, _
         Optional subtotal_location As XlSubtototalLocationType = xlAtTop, _
         Optional blank_line_insert As Boolean = False, _
         Optional show_all_items As Boolean = False, _
-        Optional repeat_labels As Boolean = False _
+        Optional repeat_labels As Boolean = False, _
+        Optional row_layout As XlLayoutRowType = -1 _
         ) As PtWField
     ' Add new row field and store it in p_row_fields_dict
     ' Return the new row field
@@ -576,7 +577,8 @@ Public Function add_row_field(field_name As String, _
             subtotal_location, _
             blank_line_insert, _
             show_all_items, _
-            repeat_labels
+            repeat_labels, _
+            row_layout
 
     p_row_fields_dict.Add key, ptfield
     Set add_row_field = ptfield
@@ -1098,22 +1100,38 @@ Private Function apply_rowcol_options(cls_pt_fields() As PtWField, pt_fields() A
         Set cls_pt_field = cls_pt_fields(i)
         Set pt_field = pt_fields(i)
         
-        ' Apply subtotal visibility
-        pt_field.Subtotals(1) = True 'Set to True first to disable the other 11 subtotals
-        pt_field.Subtotals(1) = cls_pt_field.get_rowcol_subtotal_visible()
-        
-        ' Set subtotal location
-        pt_field.LayoutSubtotalLocation = cls_pt_field.get_rowcol_subtotal_location()
-        
-        ' Apply blank line
-        pt_field.LayoutBlankLine = cls_pt_field.get_rowcol_blank_line_insert()
-        
-        ' Apply repeat labels
-        pt_field.RepeatLabels = cls_pt_field.get_rowcol_repeat_labels()
-        
-        ' Apply show all items
-        pt_field.ShowAllItems = cls_pt_field.get_rowcol_show_all_items()
-        
+        With pt_field
+            ' Apply subtotal visibility
+            .Subtotals(1) = True 'Set to True first to disable the other 11 subtotals
+            .Subtotals(1) = cls_pt_field.get_rowcol_subtotal_visible()
+            
+            ' Set subtotal location
+            .LayoutSubtotalLocation = cls_pt_field.get_rowcol_subtotal_location()
+            
+            ' Apply blank line
+            .LayoutBlankLine = cls_pt_field.get_rowcol_blank_line_insert()
+            
+            ' Apply repeat labels
+            .RepeatLabels = cls_pt_field.get_rowcol_repeat_labels()
+            
+            ' Apply show all items
+            .ShowAllItems = cls_pt_field.get_rowcol_show_all_items()
+            
+            ' Apply row layout
+            Dim layout As XlLayoutRowType
+            layout = cls_pt_field.get_rowcol_layout()
+            Select Case layout
+                Case XlLayoutRowType.xlCompactRow
+                    .LayoutForm = xlOutline
+                    .LayoutCompactRow = True
+                Case XlLayoutRowType.xlOutlineRow
+                    .LayoutForm = xlOutline
+                    .LayoutCompactRow = False
+                Case XlLayoutRowType.xlTabularRow
+                    .LayoutForm = xlTabular
+            End Select
+            
+        End With
     Next i
     
     apply_rowcol_options = True

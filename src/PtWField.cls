@@ -28,6 +28,7 @@ Private p_rowcol_blank_line_insert As Boolean
 Private p_rowcol_subtotal_location As XlSubtototalLocationType
 Private p_rowcol_repeat_labels As Boolean
 Private p_rowcol_show_all_items As Boolean
+Private p_rowcol_layout As XlLayoutRowType
 
 Private p_data_function As XlConsolidationFunction
 Private p_data_calculation As XlPivotFieldCalculation
@@ -51,7 +52,8 @@ Sub init_row(field_name As String, _
         Optional subtotal_location As XlSubtototalLocationType = xlAtTop, _
         Optional blank_line_insert As Boolean = False, _
         Optional show_all_items As Boolean = False, _
-        Optional repeat_labels As Boolean = False)
+        Optional repeat_labels As Boolean = False, _
+        Optional layout As XlLayoutRowType = -1)
         
     ' Initialize Row Field
         
@@ -70,7 +72,8 @@ Sub init_row(field_name As String, _
             subtotal_location:=subtotal_location, _
             blank_line_insert:=blank_line_insert, _
             show_all_items:=show_all_items, _
-            repeat_labels:=repeat_labels
+            repeat_labels:=repeat_labels, _
+            layout:=layout
     
 End Sub
 
@@ -88,7 +91,8 @@ Sub init_col(field_name As String, _
         Optional subtotal_location As XlSubtototalLocationType = xlAtTop, _
         Optional blank_line_insert As Boolean = False, _
         Optional show_all_items As Boolean = False, _
-        Optional repeat_labels As Boolean = False)
+        Optional repeat_labels As Boolean = False, _
+        Optional layout As XlLayoutRowType = -1)
         
     ' Initialize Column Field
     
@@ -107,7 +111,8 @@ Sub init_col(field_name As String, _
             subtotal_location:=subtotal_location, _
             blank_line_insert:=blank_line_insert, _
             show_all_items:=show_all_items, _
-            repeat_labels:=repeat_labels
+            repeat_labels:=repeat_labels, _
+            layout:=layout
             
 End Sub
 
@@ -159,7 +164,8 @@ Private Sub init_rowcol(field_name As String, _
         Optional subtotal_location As XlSubtototalLocationType = xlAtTop, _
         Optional blank_line_insert As Boolean = False, _
         Optional show_all_items As Boolean = False, _
-        Optional repeat_labels As Boolean = False)
+        Optional repeat_labels As Boolean = False, _
+        Optional layout As XlLayoutRowType)
     ' Shared code for initializing Row and Column Fields
         
     init field_name, field_name, orientation, position
@@ -171,6 +177,7 @@ Private Sub init_rowcol(field_name As String, _
     set_rowcol_blank_line_insert blank_line_insert
     set_rowcol_show_all_items show_all_items
     set_rowcol_repeat_labels repeat_labels
+    set_rowcol_layout layout
     
     set_rowcol_filter_type filter_type
     set_rowcol_filter_by_field_name filter_by_field_name
@@ -321,6 +328,17 @@ End Function
 
 Public Function set_rowcol_sort(sort_order As XlSortOrder, Optional sort_by_field_name As String) As Boolean
     set_rowcol_sort = set_rowcol_sort_by_field_name(sort_by_field_name) And set_rowcol_sort_order(sort_order)
+End Function
+
+
+Public Function get_rowcol_layout() As XlLayoutRowType
+    get_rowcol_layout = p_rowcol_layout
+End Function
+
+
+Public Function set_rowcol_layout(layout As XlLayoutRowType) As Boolean
+    p_rowcol_layout = layout
+    set_rowcol_layout = True
 End Function
 
 

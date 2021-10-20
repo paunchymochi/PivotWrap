@@ -10,6 +10,7 @@
   - repeat labels
   - subtotal location
   - report layout
+  - row field layout
 
 ### Changed
 - Merge row/column subtotal & blankline apply functions into apply_rowcol_options function

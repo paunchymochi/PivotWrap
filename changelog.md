@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Implement Compact Layout Row & Column Headers ("Row Labels" & "Column Labels")
+- Implement row, column & page Field Caption (Changing the field name in the pivot table)
+
+### Changed
+
+- Set position as an optional parameter
+- Discard source_field_name; use field_caption instead
+
 ## [0.1.3] - 2021-10-20
 
 ### Added

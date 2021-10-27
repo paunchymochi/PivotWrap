@@ -31,9 +31,15 @@ Private p_pt_null_string As String
 Private p_pt_display_error_string As Boolean
 Private p_pt_display_null_string As Boolean
 
+Private p_pt_compact_layout_row_header As String
+Private p_pt_compact_layout_column_header As String
+
 Private p_pt_report_layout As XlLayoutRowType
 
 Private p_title As String
+
+
+
 
 ' === Public Property Accessors for Dictionaries ===
 Public Property Get row_fields() As Scripting.Dictionary
@@ -120,6 +126,16 @@ End Function
 
 Public Function get_pt_report_layout() As XlLayoutRowType
     get_pt_report_layout = p_pt_report_layout
+End Function
+
+
+Public Function get_pt_compact_layout_row_header() As String
+    get_pt_compact_layout_row_header = p_pt_compact_layout_row_header
+End Function
+
+
+Public Function get_pt_compact_layout_column_header() As String
+    get_pt_compact_layout_column_header = p_pt_compact_layout_column_header
 End Function
 
 ' =====
@@ -295,6 +311,9 @@ Private Sub setup_defaults()
     p_pt_row_grand_visible = True
     p_pt_column_grand_visible = True
     
+    ' Compact Layout Row & Column Headers
+    p_pt_compact_layout_column_header = "Column Labels"
+    p_pt_compact_layout_row_header = "Row Labels"
     
 End Sub
 
@@ -717,6 +736,20 @@ Public Function add_page_field(field_name As String, _
     p_page_fields_dict.Add key, ptfield
     Set add_page_field = ptfield
         
+End Function
+
+
+Public Function set_compact_layout_headers(Optional row_header As String, Optional column_header As String) As Boolean
+    ' Set row & column headers of compact pivot table (i.e. replace "Row Labels" and "Column Labels")
+    
+    If Not row_header = vbNullString Then
+        p_pt_compact_layout_row_header = row_header
+    End If
+    
+    If Not column_header = vbNullString Then
+        p_pt_compact_layout_column_header = column_header
+    End If
+    
 End Function
 
 
@@ -1376,6 +1409,14 @@ Private Function apply_pt_options(pt As PivotTable, row_fields() As PivotField, 
     
     ' Report Layout
     pt.RowAxisLayout p_pt_report_layout
+    
+    ' Row & Column Compact Layout Headers
+    If Not p_pt_compact_layout_column_header = vbNullString Then
+        pt.CompactLayoutColumnHeader = p_pt_compact_layout_column_header
+    End If
+    If Not p_pt_compact_layout_row_header = vbNullString Then
+        pt.CompactLayoutRowHeader = p_pt_compact_layout_row_header
+    End If
     
 End Function
 

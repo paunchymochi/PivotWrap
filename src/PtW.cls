@@ -990,6 +990,11 @@ Public Function create(Optional destination_row As Long, _
     PtField_pages = apply_rowcolpage_pt_fields(pt, PtWField_pages)
     PtField_datas = apply_data_pt_fields(pt, PtWField_datas)
     
+    ' Set row/column/page caption
+    apply_rowcolpage_caption PtWField_rows, PtField_rows
+    apply_rowcolpage_caption PtWField_columns, PtField_columns
+    apply_rowcolpage_caption PtWField_pages, PtField_pages
+    
     ' Set row/column sorting
     apply_rowcol_sort PtWField_rows, PtField_rows
     apply_rowcol_sort PtWField_columns, PtField_columns
@@ -1072,6 +1077,31 @@ Private Function update_pivot_table_dict(pt As PivotTable) As Boolean
     
     update_pivot_table_dict = True
     
+End Function
+
+
+Private Function apply_rowcolpage_caption(cls_pt_fields() As PtWField, pt_fields() As PivotField) As Boolean
+    ' Applies caption name
+    ' Called by create()
+    
+    Dim cls_pt_field As PtWField
+    Dim pt_field As PivotField
+    Dim i As Long
+    
+    If UBound(cls_pt_fields) = -1 Then ' empty cls_pt_fields
+        apply_rowcolpage_caption = False
+        Exit Function
+    End If
+    
+    For i = LBound(cls_pt_fields) To UBound(cls_pt_fields)
+        Set cls_pt_field = cls_pt_fields(i)
+        Set pt_field = pt_fields(i)
+        
+        pt_field.Caption = cls_pt_field.get_field_caption()
+    Next i
+    
+    apply_rowcolpage_caption = True
+        
 End Function
 
 

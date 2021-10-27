@@ -533,6 +533,7 @@ End Function
 
 
 Public Function add_row_field(field_name As String, _
+        Optional field_caption As String, _
         Optional ref_position As Long, _
         Optional key As String, _
         Optional sort_by As String, _
@@ -555,8 +556,12 @@ Public Function add_row_field(field_name As String, _
     If key = vbNullString Then
         key = field_name
     End If
+    
+    If field_caption = vbNullString Then
+        field_caption = field_name
+    End If
         
-    If Not validate_field_name_inputs(field_name, field_name, key, p_row_fields_dict) Then
+    If Not validate_field_name_inputs(field_name, field_caption, key, p_row_fields_dict) Then
         Exit Function
     End If
     
@@ -565,7 +570,7 @@ Public Function add_row_field(field_name As String, _
     
     ptfield.init_row _
             field_name, _
-            field_name, _
+            field_caption, _
             ref_position, _
             sort_by, _
             sort_order, _
@@ -588,6 +593,7 @@ End Function
 
 
 Public Function add_column_field(field_name As String, _
+        Optional field_caption As String, _
         Optional ref_position As Long, _
         Optional key As String, _
         Optional sort_by As String, _
@@ -610,7 +616,11 @@ Public Function add_column_field(field_name As String, _
         key = field_name
     End If
     
-    If Not validate_field_name_inputs(field_name, field_name, key, p_column_fields_dict) Then
+    If field_caption = vbNullString Then
+        field_caption = field_name
+    End If
+    
+    If Not validate_field_name_inputs(field_name, field_caption, key, p_column_fields_dict) Then
         Exit Function
     End If
     
@@ -619,7 +629,7 @@ Public Function add_column_field(field_name As String, _
     
     ptfield.init_col _
             field_name, _
-            field_name, _
+            field_caption, _
             ref_position, _
             sort_by, _
             sort_order, _
@@ -676,6 +686,7 @@ End Function
 
 
 Public Function add_page_field(field_name As String, _
+        Optional field_caption As String, _
         Optional ref_position As Long, _
         Optional key As String, _
         Optional current_page As String) As PtWField
@@ -686,7 +697,11 @@ Public Function add_page_field(field_name As String, _
         key = field_name
     End If
     
-    If Not validate_field_name_inputs(field_name, field_name, key, p_page_fields_dict) Then
+    If field_caption = vbNullString Then
+        field_caption = field_name
+    End If
+    
+    If Not validate_field_name_inputs(field_name, field_caption, key, p_page_fields_dict) Then
         Exit Function
     End If
     
@@ -695,6 +710,7 @@ Public Function add_page_field(field_name As String, _
     
     ptfield.init_page _
             field_name, _
+            field_caption, _
             ref_position, _
             current_page
     

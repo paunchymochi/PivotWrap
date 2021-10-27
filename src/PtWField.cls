@@ -10,9 +10,9 @@ Attribute VB_Exposed = False
 Option Explicit
 
 Private p_field_name As String
-Private p_source_field_name As String
+Private p_field_caption As String
 Private p_orientation As XlPivotFieldOrientation
-Private p_position As Long
+Private p_ref_position As Long
 
 Private p_rowcol_sort_order As XlSortOrder
 Private p_rowcol_sort_by As String
@@ -40,7 +40,8 @@ Private p_current_page As Variant
 
 
 Sub init_row(field_name As String, _
-        position As Long, _
+        Optional field_caption As String, _
+        Optional ref_position As Long, _
         Optional sort_by As String, _
         Optional sort_order As XlSortOrder = xlAscending, _
         Optional filter_type As XlPivotFilterType, _
@@ -59,8 +60,9 @@ Sub init_row(field_name As String, _
         
     init_rowcol _
             field_name:=field_name, _
+            field_caption:=field_caption, _
             orientation:=xlRowField, _
-            position:=position, _
+            ref_position:=ref_position, _
             sort_by:=sort_by, _
             sort_order:=sort_order, _
             filter_type:=filter_type, _
@@ -79,7 +81,8 @@ End Sub
 
 
 Sub init_col(field_name As String, _
-        position As Long, _
+        Optional field_caption As String, _
+        Optional ref_position As Long, _
         Optional sort_by As String, _
         Optional sort_order As XlSortOrder = xlAscending, _
         Optional filter_type As XlPivotFilterType, _
@@ -98,8 +101,9 @@ Sub init_col(field_name As String, _
     
     init_rowcol _
             field_name:=field_name, _
+            field_caption:=field_caption, _
             orientation:=xlColumnField, _
-            position:=position, _
+            ref_position:=ref_position, _
             sort_by:=sort_by, _
             sort_order:=sort_order, _
             filter_type:=filter_type, _
@@ -118,14 +122,18 @@ End Sub
 
 
 Sub init_data(field_name As String, _
-        source_field_name As String, _
-        position As Long, _
+        field_caption As String, _
+        Optional ref_position As Long, _
         Optional data_function As XlConsolidationFunction = xlSum, _
         Optional data_calculation As XlPivotFieldCalculation = xlNoAdditionalCalculation, _
         Optional data_number_format As String = "General")
     ' Initialize Data Field
     
-    init field_name, source_field_name, xlDataField, position
+    init _
+            field_name:=field_name, _
+            field_caption:=field_caption, _
+            orientation:=xlDataField, _
+            ref_position:=ref_position
     
     set_data_function data_function
     set_data_calculation data_calculation
@@ -135,11 +143,16 @@ End Sub
 
 
 Sub init_page(field_name As String, _
-        position As Long, _
+        Optional field_caption As String, _
+        Optional ref_position As Long, _
         Optional current_page As Variant = "(All)")
     ' Initialize Page Field
     
-    init field_name, field_name, xlPageField, position
+    init _
+            field_name:=field_name, _
+            field_caption:=field_caption, _
+            orientation:=xlPageField, _
+            ref_position:=ref_position
     
     If IsMissing(current_page) Or current_page = "" Then
         set_current_page "(All)"
@@ -150,9 +163,11 @@ Sub init_page(field_name As String, _
 End Sub
 
 
-Private Sub init_rowcol(field_name As String, _
+Private Sub init_rowcol( _
+        field_name As String, _
+        field_caption As String, _
         orientation As XlPivotFieldOrientation, _
-        position As Long, _
+        Optional ref_position As Long, _
         Optional sort_by As String, _
         Optional sort_order As XlSortOrder = xlAscending, _
         Optional filter_type As XlPivotFilterType, _
@@ -168,7 +183,11 @@ Private Sub init_rowcol(field_name As String, _
         Optional layout As XlLayoutRowType)
     ' Shared code for initializing Row and Column Fields
         
-    init field_name, field_name, orientation, position
+    init _
+            field_name:=field_name, _
+            field_caption:=field_caption, _
+            orientation:=orientation, _
+            ref_position:=ref_position
     
     set_rowcol_sort_by_field_name sort_by
     set_rowcol_sort_order sort_order
@@ -194,15 +213,19 @@ End Sub
 
 
 Private Sub init(field_name As String, _
-        source_field_name As String, _
+        field_caption As String, _
         orientation As XlPivotFieldOrientation, _
-        position As Long)
+        Optional ref_position As Long)
     ' Shared code for initializing all 4 field orientations
     
+    If field_caption = vbNullString Then
+        field_caption = field_name
+    End If
+    
     set_field_name field_name
-    set_source_field_name source_field_name
+    set_field_caption field_caption
     set_orientation orientation
-    set_position position
+    set_ref_position ref_position
     
 End Sub
 
@@ -254,37 +277,39 @@ Private Function set_field_name(field_name As String) As Boolean
 End Function
 
 
-Public Function get_source_field_name() As String
-    get_source_field_name = p_source_field_name
+Public Function get_field_caption() As String
+    get_field_caption = p_field_caption
 End Function
 
 
-Private Function set_source_field_name(source_field_name As String) As Boolean
-    If source_field_name = vbNullString Then
-        MsgBox "Source Field Name cannot be empty"
-        set_source_field_name = False
+Private Function set_field_caption(field_caption As String) As Boolean
+    If field_caption = vbNullString Then
+        MsgBox "Field Caption cannot be empty"
+        set_field_caption = False
         Exit Function
     End If
     
-    p_source_field_name = source_field_name
-    set_source_field_name = True
+    p_field_caption = field_caption
+    set_field_caption = True
     
 End Function
 
 
-Public Function get_position() As Long
-    get_position = p_position
+Public Function get_ref_position() As Long
+    get_ref_position = p_ref_position
 End Function
 
 
-Public Function set_position(position As Long) As Long
-    If position < 1 Then
-        MsgBox "set_position failed. Argument position must be greater than or equal to 1."
-        set_position = False
-    Else
-        p_position = position
-        set_position = True
-    End If
+Public Function set_ref_position(position As Long) As Long
+'    If position < 1 Then
+'        MsgBox "set_ref_position failed. Argument position must be greater than or equal to 1."
+'        set_ref_position = False
+'    Else
+'        p_ref_position = position
+'        set_ref_position = True
+'    End If
+    p_ref_position = position
+    set_ref_position = True
 End Function
 
 
@@ -312,13 +337,13 @@ Public Function get_rowcol_sort_by_field_name() As String
 End Function
 
 
-Public Function set_rowcol_sort_by_field_name(Optional field_name As String) As Boolean
+Public Function set_rowcol_sort_by_field_name(Optional sort_by_field_caption As String) As Boolean
 
-    ' if sort_by is vbnullstring then set sort_by to source_field_name
-    If field_name = vbNullString Then
-        p_rowcol_sort_by = p_source_field_name
+    ' if sort_by is vbnullstring then set sort_by to p_field_caption
+    If sort_by_field_caption = vbNullString Then
+        p_rowcol_sort_by = p_field_caption
     Else
-        p_rowcol_sort_by = field_name
+        p_rowcol_sort_by = sort_by_field_caption
     End If
     
     set_rowcol_sort_by_field_name = True

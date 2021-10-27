@@ -57,17 +57,17 @@ Set ptf = pt.add_row_field( _
 	filter_value1="12")
 
 ' Create a "Month" PivotWrap column field
-pt.add_column_field "Month", 1
+pt.add_column_field "Month"
 
 ' Create a "Year" PivotWrap page field,
 ' set current page to 2012, 2016, 2017
-pt.add_page_field "Year", 1, , Array("2012", "2016", "2017")
+pt.add_page_field "Year", current_page:=Array("2012", "2016", "2017")
 
 ' Create a "TotalRevenue" PivotWrap data field
-Set ptf = pt.add_data_field("TotalRevenue", "Revenue", 1, , xlSum)
+pt.add_data_field "Revenue", "TotalRevenue" 'xlSum by default
 
 ' Create an "AverageRevenue" PivotWrap data field
-pt.add_data_field "AvgRevenue", "Revenue", 2, , xlAverage
+pt.add_data_field "Revenue", "AverageRevenue", data_function:=xlAverage
 ```
 
 Creating multiple PtWFields with the same orientation is straightforward
